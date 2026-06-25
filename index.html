@@ -1991,7 +1991,7 @@
     </section>
 
     <!-- ==================== 3.5 STATIC BANNER ==================== -->
-    <section class="static-banner-section">
+    <section class="static-banner-section" style="display: none;">
         <div class="container">
             <div class="static-banner-wrapper">
                 <img src="https://files.catbox.moe/ru6efb.jpeg" alt="Wiqayah Pro Banner" class="static-banner-img">
@@ -3217,10 +3217,12 @@
             const heroSlider = document.querySelector('.hero-slider');
             const mainGrid = document.querySelector('.main-grid');
             const benefitsSection = document.querySelector('.benefits-section');
+            const staticBanner = document.querySelector('.static-banner-section');
 
             if (heroSlider) heroSlider.style.display = 'none';
             if (mainGrid) mainGrid.style.display = 'none';
             if (benefitsSection) benefitsSection.style.display = 'none';
+            if (staticBanner) staticBanner.style.display = 'block';
 
             const singlePostView = document.getElementById('single-post-view');
             if (singlePostView) {
@@ -3268,12 +3270,14 @@
             const benefitsSection = document.querySelector('.benefits-section');
             const singlePostView = document.getElementById('single-post-view');
             const progressBar = document.getElementById('reading-progress');
+            const staticBanner = document.querySelector('.static-banner-section');
 
             if (heroSlider) heroSlider.style.display = '';
             if (mainGrid) mainGrid.style.display = '';
             if (benefitsSection) benefitsSection.style.display = '';
             if (singlePostView) singlePostView.style.display = 'none';
             if (progressBar) progressBar.style.width = '0%';
+            if (staticBanner) staticBanner.style.display = 'none';
         }
 
         // Scroll Progress Bar Logic
