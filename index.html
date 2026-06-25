@@ -2948,7 +2948,7 @@
             align-items: center;
         }
 
-        /* Comments Section Styling */
+        /* Supabase Comments Section Styling */
         .comments-section-wrapper {
             margin-top: 40px;
             padding: 30px;
@@ -2989,9 +2989,201 @@
             margin-bottom: 25px;
         }
 
-        .comments-container {
-            min-height: 150px;
-            position: relative;
+        /* Comments List */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 35px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .comment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+            border-color: rgba(243, 156, 18, 0.15);
+        }
+
+        .comment-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .comment-content-area {
+            flex-grow: 1;
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .comment-author {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .comment-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .comment-text {
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin: 0;
+            white-space: pre-line;
+        }
+
+        /* Comments States */
+        .comments-loading, .comments-empty, .comments-error {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .comments-error {
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            border-radius: 8px;
+            border: 1px solid #fde2e2;
+        }
+
+        /* Comment Form */
+        .comment-form {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            padding-top: 25px;
+        }
+
+        .comment-form h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            color: var(--text-dark);
+            background-color: #f8fafc;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--accent-orange);
+            background-color: var(--white);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-submit-btn {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 12px rgba(13, 30, 61, 0.15);
+        }
+
+        .comment-submit-btn:hover {
+            background-color: var(--accent-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(243, 156, 18, 0.2);
+        }
+
+        .comment-submit-btn:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .comment-message {
+            margin-top: 15px;
+            font-size: 13px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .comment-message.success {
+            display: block;
+            color: #27ae60;
+            background-color: #ebf9eb;
+            border: 1px solid #d4eed4;
+        }
+
+        .comment-message.error {
+            display: block;
+            color: #c0392b;
+            background-color: #fdf2f2;
+            border: 1px solid #fde2e2;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
         }
 
         /* ==================== HERO SLIDESHOW ==================== */
@@ -3460,39 +3652,197 @@
                             '<h3>التعليقات والمناقشات</h3>' +
                         '</div>' +
                         '<p class="comments-intro">' +
-                            'شاركنا برأيك أو استفسارك حول هذه التدوينة. يمكنك كتابة تعليقك مباشرة بكل سهولة دون الحاجة لتسجيل دخول إجباري.' +
+                            'شاركنا برأيك أو استفسارك حول هذه التدوينة. يتم نشر تعليقك وحفظه فورياً.' +
                         '</p>' +
-                        '<div id="cusdis_thread"' +
-                            ' data-host="https://cusdis.com"' +
-                            ' data-app-id="27de9010-bca9-430a-9796-44ecf66208eb"' +
-                            ' data-page-id="post-' + post.id + '"' +
-                            ' data-page-url="' + window.location.origin + window.location.pathname + '#post/' + post.id + '"' +
-                            ' data-page-title="' + post.title.replace(/'/g, "\\'") + '"' +
-                            ' data-lang="ar"' +
-                            ' style="min-height: 150px;"' +
-                        '></div>' +
+                        '<div id="comments-list" class="comments-list">' +
+                            '<div class="comments-loading">جاري تحميل التعليقات...</div>' +
+                        '</div>' +
+                        '<form id="comment-form" class="comment-form">' +
+                            '<h4>أضف تعليقك</h4>' +
+                            '<div class="form-row">' +
+                                '<div class="form-group">' +
+                                    '<label for="comment-nickname">الاسم المستعار *</label>' +
+                                    '<input type="text" id="comment-nickname" required placeholder="مثال: المهندس أحمد">' +
+                                '</div>' +
+                                '<div class="form-group">' +
+                                    '<label for="comment-email">البريد الإلكتروني (اختياري)</label>' +
+                                    '<input type="email" id="comment-email" placeholder="لن يتم نشره للعامة">' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="form-group">' +
+                                '<label for="comment-content">التعليق *</label>' +
+                                '<textarea id="comment-content" required rows="4" placeholder="اكتب تعليقك هنا..."></textarea>' +
+                            '</div>' +
+                            '<div class="form-actions">' +
+                                '<button type="submit" id="comment-submit-btn" class="comment-submit-btn">' +
+                                    '<span>إرسال التعليق</span>' +
+                                '</button>' +
+                            '</div>' +
+                            '<div id="comment-message" class="comment-message"></div>' +
+                        '</form>' +
                     '</div>';
 
                 singlePostView.style.display = 'block';
 
-                // Load Cusdis dynamically for this post
-                const cusdisThread = document.getElementById('cusdis_thread');
-                if (cusdisThread) {
-                    if (window.CUSDIS && typeof window.CUSDIS.renderTo === 'function') {
-                        window.CUSDIS.renderTo(cusdisThread);
-                    } else {
-                        const scriptId = 'cusdis-script';
-                        let script = document.getElementById(scriptId);
-                        if (!script) {
-                            script = document.createElement('script');
-                            script.id = scriptId;
-                            script.src = 'https://cusdis.com/js/cusdis.es.js';
-                            script.async = true;
-                            script.defer = true;
-                            document.body.appendChild(script);
+                // Load Supabase Comments dynamically for this post
+                (function() {
+                    const commentsList = document.getElementById('comments-list');
+                    const commentForm = document.getElementById('comment-form');
+                    const commentMessage = document.getElementById('comment-message');
+                    const submitBtn = document.getElementById('comment-submit-btn');
+
+                    const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+                    const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+                    const commentsPostId = 'post-' + post.id;
+
+                    function getAvatarColor(name) {
+                        let hash = 0;
+                        for (let i = 0; i < name.length; i++) {
+                            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                        }
+                        const h = Math.abs(hash % 360);
+                        return 'hsl(' + h + ', 70%, 40%)';
+                    }
+
+                    function formatRelativeTime(dateStr) {
+                        try {
+                            const date = new Date(dateStr);
+                            const now = new Date();
+                            const diffMs = now - date;
+                            const diffMins = Math.floor(diffMs / 60000);
+                            const diffHours = Math.floor(diffMins / 60);
+                            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                            
+                            if (diffMins < 1) return 'الآن';
+                            if (diffMins < 60) return 'منذ ' + diffMins + ' دقيقة';
+                            if (diffHours < 24) return 'منذ ' + diffHours + ' ساعة';
+                            if (diffDays === 1) return 'أمس';
+                            if (diffDays < 7) return 'منذ ' + diffDays + ' أيام';
+                            
+                            const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+                            return date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+                        } catch(e) {
+                            return dateStr;
                         }
                     }
-                }
+
+                    async function loadComments() {
+                        if (!commentsList) return;
+                        commentsList.innerHTML = '<div class="comments-loading">جاري تحميل التعليقات...</div>';
+                        
+                        try {
+                            const response = await fetch(supabaseUrl + '/rest/v1/comments?post_id=eq.' + commentsPostId + '&order=created_at.asc', {
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey
+                                }
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error('Database connection error');
+                            }
+                            
+                            const comments = await response.json();
+                            
+                            if (comments.length === 0) {
+                                commentsList.innerHTML = '<div class="comments-empty">لا توجد تعليقات بعد. كن أول من يعلق!</div>';
+                                return;
+                            }
+                            
+                            let html = '';
+                            comments.forEach(c => {
+                                const initial = c.nickname.trim().charAt(0).toUpperCase();
+                                const avatarColor = getAvatarColor(c.nickname);
+                                const relativeTime = formatRelativeTime(c.created_at);
+                                const safeContent = c.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                                
+                                html += '<div class="comment-item">' +
+                                    '<div class="comment-avatar" style="background-color: ' + avatarColor + ';">' + initial + '</div>' +
+                                    '<div class="comment-content-area">' +
+                                        '<div class="comment-meta">' +
+                                            '<span class="comment-author">' + c.nickname + '</span>' +
+                                            '<span class="comment-date">' + relativeTime + '</span>' +
+                                        '</div>' +
+                                        '<p class="comment-text">' + safeContent + '</p>' +
+                                    '</div>' +
+                                '</div>';
+                            });
+                            
+                            commentsList.innerHTML = html;
+                        } catch (err) {
+                            console.error('Error loading comments:', err);
+                            commentsList.innerHTML = '<div class="comments-error">' +
+                                'عذراً، حدث خطأ أثناء تحميل التعليقات. يرجى التأكد من إنشاء جدول "comments" في Supabase وتفعيل صلاحيات القراءة (Select Policy) لـ Anon.' +
+                            '</div>';
+                        }
+                    }
+
+                    if (commentForm) {
+                        commentForm.onsubmit = async function(e) {
+                            e.preventDefault();
+                            if (submitBtn) {
+                                submitBtn.disabled = true;
+                                submitBtn.innerText = 'جاري الإرسال...';
+                            }
+                            if (commentMessage) {
+                                commentMessage.style.display = 'none';
+                                commentMessage.className = 'comment-message';
+                            }
+                            
+                            const nicknameInput = document.getElementById('comment-nickname');
+                            const emailInput = document.getElementById('comment-email');
+                            const contentInput = document.getElementById('comment-content');
+                            
+                            const nickname = nicknameInput ? nicknameInput.value.trim() : '';
+                            const email = emailInput ? emailInput.value.trim() : '';
+                            const content = contentInput ? contentInput.value.trim() : '';
+                            
+                            try {
+                                const response = await fetch(supabaseUrl + '/rest/v1/comments', {
+                                    method: 'POST',
+                                    headers: {
+                                        'apikey': supabaseKey,
+                                        'Authorization': 'Bearer ' + supabaseKey,
+                                        'Content-Type': 'application/json',
+                                        'Prefer': 'return=representation'
+                                    },
+                                    body: JSON.stringify({
+                                        post_id: commentsPostId,
+                                        nickname: nickname,
+                                        email: email || null,
+                                        content: content
+                                    })
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error('Database write error');
+                                }
+                                
+                                if (commentMessage) {
+                                    commentMessage.innerText = 'تم نشر تعليقك بنجاح! شكرًا لك.';
+                                    commentMessage.className = 'comment-message success';
+                                }
+                                
+                                if (contentInput) contentInput.value = '';
+                                
+                                await loadComments();
+                            } catch (err) {
+                                console.error('Error posting comment:', err);
+                                if (commentMessage) {
+                                    commentMessage.innerText = 'حدث خطأ أثناء إرسال التعليق. يرجى التأكد من إعداد جدول "comments" وتفعيل صلاحيات الكتابة (Insert Policy) للزوار (Anon) في Supabase.';
+                                    commentMessage.className = 'comment-message error';
+                                }
+                            } finally {
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerText = 'إرسال التعليق';
+                                }
+                            }
+                        };
+                    }
+
+                    loadComments();
+                })();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Trigger scroll event to calculate progress immediately
                 window.dispatchEvent(new Event('scroll'));
