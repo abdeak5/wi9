@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاري التوجيه...</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0d1e3d;
+            --accent-orange: #e05624;
+            --text-light: #f8f9fa;
+            --text-dark: #212529;
+            --bg-base: #060d1a;
+            
+            /* Social Platforms Branding */
+            --whatsapp-color: #25D366;
+            --telegram-color: #0088cc;
+            --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --tiktok-color: #00f2fe;
+            --linkedin-color: #0077b5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #102347 0%, var(--bg-base) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Glassmorphism card */
+        .redirect-card {
+            background: rgba(13, 30, 61, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes popIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Ambient glow in background */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            filter: blur(100px);
+            opacity: 0.15;
+            z-index: 1;
+            transition: background 0.8s ease, filter 0.8s ease;
+        }
+
+        .icon-container {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .icon-container svg {
+            width: 45px;
+            height: 45px;
+            fill: var(--text-light);
+            transition: transform 0.3s ease, fill 0.5s ease;
+        }
+
+        .icon-container::after {
+            content: '';
+            position: absolute;
+            top: -5px; right: -5px; bottom: -5px; left: -5px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        .platform-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+        }
+
+        .status-msg {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            min-height: 50px;
+        }
+
+        /* Countdown & Loader */
+        .loader-wrapper {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 30px;
+        }
+
+        .circular-loader {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circular-loader circle {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .circular-loader .bg-circle {
+            stroke: rgba(255, 255, 255, 0.05);
+        }
+
+        .circular-loader .progress-circle {
+            stroke: var(--accent-orange);
+            stroke-dasharray: 220;
+            stroke-dashoffset: 220;
+            transition: stroke-dashoffset 0.1s linear, stroke 0.5s ease;
+        }
+
+        .countdown-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 4px 15px rgba(224, 86, 36, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 86, 36, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
+        }
+
+        /* Brand themes */
+        .theme-whatsapp .icon-container {
+            background: rgba(37, 211, 102, 0.1);
+            border-color: rgba(37, 211, 102, 0.3);
+            box-shadow: 0 0 20px rgba(37, 211, 102, 0.2);
+        }
+        .theme-whatsapp .icon-container svg {
+            fill: var(--whatsapp-color);
+        }
+        .theme-whatsapp .progress-circle {
+            stroke: var(--whatsapp-color);
+        }
+        .theme-whatsapp .btn-primary {
+            background: var(--whatsapp-color);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        .theme-whatsapp .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+        }
+
+        .theme-telegram .icon-container {
+            background: rgba(0, 136, 204, 0.1);
+            border-color: rgba(0, 136, 204, 0.3);
+            box-shadow: 0 0 20px rgba(0, 136, 204, 0.2);
+        }
+        .theme-telegram .icon-container svg {
+            fill: var(--telegram-color);
+        }
+        .theme-telegram .progress-circle {
+            stroke: var(--telegram-color);
+        }
+        .theme-telegram .btn-primary {
+            background: var(--telegram-color);
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+        .theme-telegram .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.5);
+        }
+
+        .theme-instagram .icon-container {
+            background: rgba(224, 86, 36, 0.1);
+            border-color: rgba(204, 35, 102, 0.3);
+            box-shadow: 0 0 20px rgba(228, 104, 60, 0.2);
+        }
+        .theme-instagram .icon-container svg {
+            fill: url(#insta-grad);
+        }
+        .theme-instagram .progress-circle {
+            stroke: #dc2743;
+        }
+        .theme-instagram .btn-primary {
+            background: var(--instagram-gradient);
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3);
+        }
+        .theme-instagram .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(220, 39, 67, 0.5);
+        }
+
+        .theme-tiktok .icon-container {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: rgba(254, 9, 121, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+            background-color: #010101;
+        }
+        .theme-tiktok .icon-container svg {
+            fill: var(--text-light);
+            filter: drop-shadow(-2px -2px 0px #fe0979) drop-shadow(2px 2px 0px #00f2fe);
+        }
+        .theme-tiktok .progress-circle {
+            stroke: var(--tiktok-color);
+        }
+        .theme-tiktok .btn-primary {
+            background: #010101;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+            color: var(--text-light);
+        }
+        .theme-tiktok .btn-primary:hover {
+            background: #111;
+            box-shadow: 0 6px 20px rgba(254, 9, 121, 0.3);
+        }
+
+        .theme-linkedin .icon-container {
+            background: rgba(0, 119, 181, 0.1);
+            border-color: rgba(0, 119, 181, 0.3);
+            box-shadow: 0 0 20px rgba(0, 119, 181, 0.2);
+        }
+        .theme-linkedin .icon-container svg {
+            fill: var(--linkedin-color);
+        }
+        .theme-linkedin .progress-circle {
+            stroke: var(--linkedin-color);
+        }
+        .theme-linkedin .btn-primary {
+            background: var(--linkedin-color);
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.3);
+        }
+        .theme-linkedin .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.5);
+        }
+
+        .error-card {
+            border-color: rgba(224, 86, 36, 0.3) !important;
+            background: rgba(20, 10, 10, 0.6) !important;
+        }
+
+        /* Back animation lines */
+        .bg-lines {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow" id="glow"></div>
+
+    <div class="bg-lines">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+
+    <div class="redirect-card" id="card">
+        <!-- SVG Gradient for Instagram -->
+        <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+            <linearGradient id="insta-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f09433"/>
+                <stop offset="25%" stop-color="#e6683c"/>
+                <stop offset="50%" stop-color="#dc2743"/>
+                <stop offset="75%" stop-color="#cc2366"/>
+                <stop offset="100%" stop-color="#bc1888"/>
+            </linearGradient>
+        </svg>
+
+        <div class="icon-container" id="icon-box">
+            <!-- SVG will be injected here -->
+        </div>
+
+        <h1 class="platform-name" id="platform-title">جاري التحقق...</h1>
+        <p class="status-msg" id="status-text">نحن نتحقق من رابط التوجيه ونربطك بالخادم الآمن، يرجى الانتظار ثانية واحدة...</p>
+
+        <div class="loader-wrapper" id="loader-wrap">
+            <svg class="circular-loader">
+                <circle class="bg-circle" cx="35" cy="35" r="32"></circle>
+                <circle class="progress-circle" id="progress-bar" cx="35" cy="35" r="32"></circle>
+            </svg>
+            <div class="countdown-num" id="countdown">3</div>
+        </div>
+
+        <div class="btn-group">
+            <a href="#" class="btn btn-primary" id="redirect-btn" style="pointer-events: none; opacity: 0.6;">انتقال الآن</a>
+            <a href="index.html" class="btn btn-secondary">العودة للرئيسية</a>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+        const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+        // Platform definitions
+        const platforms = {
+            whatsapp: {
+                name: 'واتساب WhatsApp',
+                dbColumn: 'social_whatsapp',
+                color: '#25D366',
+                message: 'جاري توجيهك إلى حسابنا على واتساب لبدء محادثة آمنة ومباشرة مع فريق دعم وقاية برو...',
+                svg: `<svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.292 1.48 5.405 1.481 5.361 0 9.724-4.36 9.727-9.723.002-2.6-1.01-5.043-2.85-6.887C17.09 2.181 14.645 1.169 12.01 1.169c-5.362 0-9.726 4.361-9.729 9.725-.001 2.185.58 4.316 1.683 6.132l-.991 3.616 3.674-.963zm10.177-6.828c-.278-.139-1.643-.81-1.9-.904-.256-.093-.443-.139-.63.139-.187.279-.724.904-.887 1.091-.162.186-.325.21-.603.07-2.73-1.362-3.886-2.495-4.542-3.626-.162-.28-.017-.43.122-.57.125-.125.278-.325.417-.487.139-.163.187-.279.278-.465.093-.186.047-.349-.023-.487-.07-.139-.63-1.517-.862-2.074-.226-.543-.454-.47-.63-.47h-.538c-.187 0-.49.07-.747.349-.256.279-.979.957-.979 2.333 0 1.377.997 2.709 1.137 2.894.139.186 1.962 2.997 4.753 4.202.664.287 1.183.458 1.587.587.667.212 1.275.182 1.756.11.536-.079 1.643-.67 1.875-1.317.232-.648.232-1.205.162-1.317-.07-.113-.256-.186-.534-.325z"/></svg>`
+            },
+            telegram: {
+                name: 'تيليجرام Telegram',
+                dbColumn: 'social_telegram',
+                color: '#0088cc',
+                message: 'جاري نقلك إلى قناتنا الرسمية على تيليجرام لتصفح وقراءة آخر النصائح والإرشادات الحية والمستندات الهندسية...',
+                svg: `<svg viewBox="0 0 24 24"><path d="M11.944 0C5.347 0 0 5.347 0 11.944c0 6.595 5.347 11.944 11.944 11.944 6.595 0 11.944-5.349 11.944-11.944C23.888 5.347 18.539 0 11.944 0zm5.282 8.314l-1.8 8.484c-.135.604-.493.754-.997.472l-2.74-2.02-1.322 1.272c-.147.147-.269.269-.553.269l.197-2.793 5.086-4.593c.221-.197-.048-.307-.343-.111l-6.287 3.958-2.707-.847c-.588-.184-.6-.588.123-.871l10.567-4.072c.49-.18.919.113.774.832z"/></svg>`
+            },
+            instagram: {
+                name: 'انستغرام Instagram',
+                dbColumn: 'social_instagram',
+                color: '#e6683c',
+                message: 'جاري توجيهك إلى حسابنا على انستغرام لمشاهدة التغطيات الحية والصور الحصرية لأنظمة السلامة المهنية...',
+                svg: `<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`
+            },
+            tiktok: {
+                name: 'تيك توك TikTok',
+                dbColumn: 'social_tiktok',
+                color: '#00f2fe',
+                message: 'جاري فتح حسابنا على تيك توك لمتابعة الفيديوهات التعليمية القصيرة واللقطات الميدانية لأنظمة الإطفاء والإنذار...',
+                svg: `<svg viewBox="0 0 24 24"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.92-1.31 1.92-3.58 3.17-5.92 3.26-2.3.1-4.6-.74-6.1-2.48-1.52-1.74-2.07-4.21-1.48-6.44.5-1.99 1.9-3.75 3.79-4.58 1.62-.73 3.49-.8 5.18-.34v4.22c-1.12-.39-2.39-.28-3.38.37-.89.58-1.42 1.64-1.41 2.7.01 1.07.56 2.1 1.45 2.69.96.65 2.22.75 3.24.27 1.14-.52 1.86-1.74 1.89-3v-12.8z"/></svg>`
+            },
+            linkedin: {
+                name: 'لينكد إن LinkedIn',
+                dbColumn: 'social_linkedin',
+                color: '#0077b5',
+                message: 'جاري فتح صفحتنا على شبكة لينكد إن للتواصل المهني والمؤسسي وتبادل الفرص الهندسية في مجالات السلامة...',
+                svg: `<svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`
+            }
+        };
+
+        // Parse query params
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const platformKey = (getQueryParam('platform') || '').toLowerCase();
+        const platform = platforms[platformKey];
+
+        const card = document.getElementById('card');
+        const glow = document.getElementById('glow');
+        const iconBox = document.getElementById('icon-box');
+        const platformTitle = document.getElementById('platform-title');
+        const statusText = document.getElementById('status-text');
+        const countdownEl = document.getElementById('countdown');
+        const progressBar = document.getElementById('progress-bar');
+        const redirectBtn = document.getElementById('redirect-btn');
+        const loaderWrap = document.getElementById('loader-wrap');
+
+        if (!platform) {
+            // Invalid platform specified
+            card.classList.add('error-card');
+            iconBox.innerHTML = '⚠️';
+            iconBox.style.fontSize = '36px';
+            platformTitle.textContent = 'رابط غير صالح';
+            statusText.textContent = 'عذراً، لم نتمكن من التعرف على منصة التواصل الاجتماعي المطلوبة. يرجى العودة للصفحة الرئيسية.';
+            loaderWrap.style.display = 'none';
+            redirectBtn.style.display = 'none';
+        } else {
+            // Apply platform branding
+            document.title = `توجيه إلى ${platform.name}`;
+            card.className = `redirect-card theme-${platformKey}`;
+            glow.style.background = platform.color;
+            glow.style.opacity = '0.2';
+            iconBox.innerHTML = platform.svg;
+            platformTitle.textContent = platform.name;
+            statusText.textContent = 'جاري التحقق من خوادم قاعدة البيانات...';
+
+            // Fetch actual target URL from Supabase
+            fetch(`${supabaseUrl}/rest/v1/adsense_config?id=eq.1`, {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`
+                }
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Database error');
+                return r.json();
+            })
+            .then(data => {
+                if (data && data.length > 0 && data[0][platform.dbColumn] && data[0][platform.dbColumn] !== '#') {
+                    const targetUrl = data[0][platform.dbColumn].trim();
+                    statusText.textContent = platform.message;
+                    startRedirect(targetUrl);
+                } else {
+                    showUrlError();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showUrlError();
+            });
+        }
+
+        function showUrlError() {
+            card.classList.add('error-card');
+            iconBox.innerHTML = '❌';
+            iconBox.style.fontSize = '36px';
+            platformTitle.textContent = 'رابط غير متوفر';
+            statusText.textContent = `عذراً، رابط حسابنا على ${platform.name} لم يتم تفعيله أو تعيينه من قبل الإدارة بعد. يرجى التواصل معنا لاحقاً.`;
+            loaderWrap.style.display = 'none';
+            redirectBtn.style.display = 'none';
+        }
+
+        function startRedirect(url) {
+            // Enable direct redirection button
+            redirectBtn.setAttribute('href', url);
+            redirectBtn.style.pointerEvents = 'auto';
+            redirectBtn.style.opacity = '1';
+
+            let count = 3;
+            countdownEl.textContent = count;
+            
+            // Progress dash array size is 220
+            progressBar.style.strokeDashoffset = 0;
+            progressBar.style.transition = 'stroke-dashoffset 3s linear';
+            
+            // Force redraw then animate dashoffset to 220 (empty)
+            setTimeout(() => {
+                progressBar.style.strokeDashoffset = 220;
+            }, 50);
+
+            const interval = setInterval(() => {
+                count--;
+                if (count >= 0) {
+                    countdownEl.textContent = count;
+                }
+                if (count <= 0) {
+                    clearInterval(interval);
+                    window.location.href = url;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

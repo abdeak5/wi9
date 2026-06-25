@@ -2190,21 +2190,22 @@
             // Function to apply social media links dynamically
             function applySocialLinks() {
                 const socials = {
-                    'واتساب': window.adConfig.socials.whatsapp,
-                    'تيليجرام': window.adConfig.socials.telegram,
-                    'انستغرام': window.adConfig.socials.instagram,
-                    'تيك توك': window.adConfig.socials.tiktok,
-                    'لينكد إن': window.adConfig.socials.linkedin
+                    'واتساب': { url: window.adConfig.socials.whatsapp, key: 'whatsapp' },
+                    'تيليجرام': { url: window.adConfig.socials.telegram, key: 'telegram' },
+                    'انستغرام': { url: window.adConfig.socials.instagram, key: 'instagram' },
+                    'تيك توك': { url: window.adConfig.socials.tiktok, key: 'tiktok' },
+                    'لينكد إن': { url: window.adConfig.socials.linkedin, key: 'linkedin' }
                 };
                 
                 document.querySelectorAll('.top-bar-socials .social-link').forEach(link => {
                     const title = link.getAttribute('title');
                     if (title && socials[title]) {
-                        const url = socials[title].trim();
+                        const item = socials[title];
+                        const url = item.url.trim();
                         if (!url || url === '#' || url === 'https://wa.me/#' || url === 'https://t.me/#' || url === 'https://instagram.com/#' || url === 'https://tiktok.com/#' || url === 'https://linkedin.com/#') {
                             link.style.display = 'none';
                         } else {
-                            link.setAttribute('href', url);
+                            link.setAttribute('href', 'redirect.html?platform=' + item.key);
                             link.style.display = 'inline-flex';
                         }
                     }
@@ -2399,8 +2400,27 @@
                         </div>
                         <button type="submit" id="contact-submit-btn" class="form-submit-btn">إرسال الرسالة</button>
                         <div id="contact-status-msg" style="margin-top: 15px; font-size: 13px; display: none; padding: 12px; border-radius: 6px; line-height: 1.6;"></div>
-                    </form>
+                     </form>
                 </div>
+
+                <!-- Success Modal -->
+                <div id="success-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6, 13, 26, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+                    <div style="background: rgba(13, 30, 61, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px 30px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative;">
+                        <div style="width: 70px; height: 70px; background: rgba(46, 196, 182, 0.1); border: 1px solid #2ec4b6; color: #2ec4b6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px; font-weight: bold;">✓</div>
+                        <h3 style="color: var(--text-light); font-size: 20px; font-weight: 800; margin-bottom: 12px; font-family: 'Noto Kufi Arabic', sans-serif;">تم إرسال رسالتك بنجاح!</h3>
+                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; line-height: 1.8; margin-bottom: 25px; font-family: 'Noto Kufi Arabic', sans-serif;">
+                            نشكرك على تواصلك وثقتك بـ <strong>وقاية برو</strong>. لقد تم استلام رسالتك بنجاح وسيقوم فريقنا الهندسي بالرد عليك عبر البريد الإلكتروني في أقرب وقت ممكن.
+                        </p>
+                        <button onclick="document.getElementById('success-modal').style.display='none'" style="background: var(--accent-orange); color: white; border: none; border-radius: 10px; padding: 12px 30px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(224,86,36,0.3); transition: all 0.3s ease; font-family: 'Noto Kufi Arabic', sans-serif;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(224,86,36,0.5)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(224,86,36,0.3)'">موافق</button>
+                    </div>
+                </div>
+
+                <style>
+                @keyframes modalPop {
+                    from { transform: scale(0.85); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                </style>
 
                 <script>
                     document.getElementById('contact-form-element').onsubmit = async function(e) {
@@ -2439,11 +2459,8 @@
 
                             if (!response.ok) throw new Error('Database error');
 
-                            statusMsg.innerText = 'تم إرسال رسالتك بنجاح! شكرًا لتواصلك معنا.';
-                            statusMsg.style.backgroundColor = 'rgba(46, 196, 182, 0.1)';
-                            statusMsg.style.border = '1px solid #2ec4b6';
-                            statusMsg.style.color = '#d1f7f4';
-                            statusMsg.style.display = 'block';
+                            // Show professional popup modal
+                            document.getElementById('success-modal').style.display = 'flex';
 
                             document.getElementById('contact-form-element').reset();
                         } catch(err) {

@@ -2190,21 +2190,22 @@
             // Function to apply social media links dynamically
             function applySocialLinks() {
                 const socials = {
-                    'واتساب': window.adConfig.socials.whatsapp,
-                    'تيليجرام': window.adConfig.socials.telegram,
-                    'انستغرام': window.adConfig.socials.instagram,
-                    'تيك توك': window.adConfig.socials.tiktok,
-                    'لينكد إن': window.adConfig.socials.linkedin
+                    'واتساب': { url: window.adConfig.socials.whatsapp, key: 'whatsapp' },
+                    'تيليجرام': { url: window.adConfig.socials.telegram, key: 'telegram' },
+                    'انستغرام': { url: window.adConfig.socials.instagram, key: 'instagram' },
+                    'تيك توك': { url: window.adConfig.socials.tiktok, key: 'tiktok' },
+                    'لينكد إن': { url: window.adConfig.socials.linkedin, key: 'linkedin' }
                 };
                 
                 document.querySelectorAll('.top-bar-socials .social-link').forEach(link => {
                     const title = link.getAttribute('title');
                     if (title && socials[title]) {
-                        const url = socials[title].trim();
+                        const item = socials[title];
+                        const url = item.url.trim();
                         if (!url || url === '#' || url === 'https://wa.me/#' || url === 'https://t.me/#' || url === 'https://instagram.com/#' || url === 'https://tiktok.com/#' || url === 'https://linkedin.com/#') {
                             link.style.display = 'none';
                         } else {
-                            link.setAttribute('href', url);
+                            link.setAttribute('href', 'redirect.html?platform=' + item.key);
                             link.style.display = 'inline-flex';
                         }
                     }
