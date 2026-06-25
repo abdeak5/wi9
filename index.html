@@ -3460,25 +3460,38 @@
                             '<h3>التعليقات والمناقشات</h3>' +
                         '</div>' +
                         '<p class="comments-intro">' +
-                            'شاركنا برأيك أو استفسارك حول هذه التدوينة. يتم إدارة التعليقات وتخزينها بشكل آمن ومفتوح عبر مستودع المشروع في GitHub (يتطلب إرسال التعليق تسجيل دخولك بحساب GitHub الخاص بك).' +
+                            'شاركنا برأيك أو استفسارك حول هذه التدوينة. يمكنك كتابة تعليقك مباشرة بكل سهولة دون الحاجة لتسجيل دخول إجباري.' +
                         '</p>' +
-                        '<div id="comments-container" class="comments-container"></div>' +
+                        '<div id="cusdis_thread"' +
+                            ' data-host="https://cusdis.com"' +
+                            ' data-app-id="27de9010-bca9-430a-9796-44ecf66208eb"' +
+                            ' data-page-id="post-' + post.id + '"' +
+                            ' data-page-url="' + window.location.origin + window.location.pathname + '#post/' + post.id + '"' +
+                            ' data-page-title="' + post.title.replace(/'/g, "\\'") + '"' +
+                            ' data-lang="ar"' +
+                            ' style="min-height: 150px;"' +
+                        '></div>' +
                     '</div>';
 
                 singlePostView.style.display = 'block';
 
-                // Load Utterances dynamically for this post
-                const commentsContainer = document.getElementById('comments-container');
-                if (commentsContainer) {
-                    commentsContainer.innerHTML = '';
-                    const utterancesScript = document.createElement('script');
-                    utterancesScript.src = 'https://utteranc.es/client.js';
-                    utterancesScript.setAttribute('repo', 'abdeak5/wi9');
-                    utterancesScript.setAttribute('issue-term', 'post-' + post.id);
-                    utterancesScript.setAttribute('theme', 'github-light');
-                    utterancesScript.setAttribute('crossorigin', 'anonymous');
-                    utterancesScript.async = true;
-                    commentsContainer.appendChild(utterancesScript);
+                // Load Cusdis dynamically for this post
+                const cusdisThread = document.getElementById('cusdis_thread');
+                if (cusdisThread) {
+                    if (window.CUSDIS && typeof window.CUSDIS.renderTo === 'function') {
+                        window.CUSDIS.renderTo(cusdisThread);
+                    } else {
+                        const scriptId = 'cusdis-script';
+                        let script = document.getElementById(scriptId);
+                        if (!script) {
+                            script = document.createElement('script');
+                            script.id = scriptId;
+                            script.src = 'https://cusdis.com/js/cusdis.es.js';
+                            script.async = true;
+                            script.defer = true;
+                            document.body.appendChild(script);
+                        }
+                    }
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Trigger scroll event to calculate progress immediately
