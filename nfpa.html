@@ -2133,7 +2133,7 @@
             }
         }
 </style>
-        <!-- Google AdSense Dynamic Loader -->
+            <!-- Google AdSense & Socials Dynamic Loader -->
     <script>
         (function() {
             window.adConfig = {
@@ -2145,6 +2145,13 @@
                     middle: '2222222222',
                     bottom: '3333333333',
                     inner_footer: '4444444444'
+                },
+                socials: {
+                    whatsapp: 'https://wa.me/#',
+                    telegram: 'https://t.me/#',
+                    instagram: 'https://instagram.com/#',
+                    tiktok: 'https://tiktok.com/#',
+                    linkedin: 'https://linkedin.com/#'
                 }
             };
 
@@ -2180,6 +2187,32 @@
                 }
             };
 
+            // Function to apply social media links dynamically
+            function applySocialLinks() {
+                const socials = {
+                    'واتساب': window.adConfig.socials.whatsapp,
+                    'تيليجرام': window.adConfig.socials.telegram,
+                    'انستغرام': window.adConfig.socials.instagram,
+                    'تيك توك': window.adConfig.socials.tiktok,
+                    'لينكد إن': window.adConfig.socials.linkedin
+                };
+                
+                document.querySelectorAll('.top-bar-socials .social-link').forEach(link => {
+                    const title = link.getAttribute('title');
+                    if (title && socials[title]) {
+                        const url = socials[title].trim();
+                        if (!url || url === '#' || url === 'https://wa.me/#' || url === 'https://t.me/#' || url === 'https://instagram.com/#' || url === 'https://tiktok.com/#' || url === 'https://linkedin.com/#') {
+                            link.style.display = 'none';
+                        } else {
+                            link.setAttribute('href', url);
+                            link.style.display = 'inline-flex';
+                        }
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', applySocialLinks);
+
             // Fetch config from Supabase
             fetch(supabaseUrl + '/rest/v1/adsense_config?id=eq.1&select=*', {
                 headers: {
@@ -2198,11 +2231,18 @@
                     window.adConfig.slots.middle = config.slot_middle;
                     window.adConfig.slots.bottom = config.slot_bottom;
                     window.adConfig.slots.inner_footer = config.slot_inner_footer;
+                    
+                    // Assign social links if exist in db
+                    if (config.social_whatsapp) window.adConfig.socials.whatsapp = config.social_whatsapp;
+                    if (config.social_telegram) window.adConfig.socials.telegram = config.social_telegram;
+                    if (config.social_instagram) window.adConfig.socials.instagram = config.social_instagram;
+                    if (config.social_tiktok) window.adConfig.socials.tiktok = config.social_tiktok;
+                    if (config.social_linkedin) window.adConfig.socials.linkedin = config.social_linkedin;
                 }
                 triggerReady();
             })
             .catch(err => {
-                console.warn('Could not load ad settings from Supabase, using defaults:', err);
+                console.warn('Could not load settings from Supabase, using defaults:', err);
                 triggerReady();
             });
 
@@ -2210,6 +2250,11 @@
                 window.adConfigLoaded = true;
                 document.dispatchEvent(new Event('adConfigReady'));
                 
+                // Also apply socials if DOM already loaded
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    applySocialLinks();
+                }
+
                 if (window.adConfig.enabled) {
                     const script = document.createElement('script');
                     script.async = true;
