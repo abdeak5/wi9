@@ -3172,54 +3172,78 @@
             if (trimmed.startsWith('<') && (trimmed.includes('</p>') || trimmed.includes('</h3>') || trimmed.includes('</h4>') || trimmed.includes('</ul>') || trimmed.includes('</div>'))) {
                 return text;
             }
-            const lines = text.split('\n');
+            
+            // Split by double newlines or multiple empty lines to detect logical blocks
+            const blocks = text.split(/\n\s*\n/);
             let result = '';
-            let inList = false;
 
-            lines.forEach(function(line) {
-                let t = line.trim();
-                if (!t) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    return;
-                }
-                // Markdown-style headers
-                if (t.startsWith('### ') || t.startsWith('## ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += '<h4 style="color: #0d1e3d; margin: 25px 0 12px 0; font-size: 18px; font-weight: 700;">' + t.replace(/^#+\s+/, '') + '</h4>';
-                } else if (t.startsWith('# ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += '<h3 style="color: #f39c12; margin: 30px 0 15px 0; font-size: 21px; font-weight: 800; border-bottom: 3px solid rgba(243, 156, 18, 0.15); padding-bottom: 8px;">' + t.substring(2) + '</h3>';
-                }
-                // Bullet points
-                else if (t.startsWith('* ') || t.startsWith('- ') || t.startsWith('\u2022 ')) {
-                    if (!inList) {
-                        result += '<ul style="margin: 20px 20px 25px 0; padding-right: 25px; list-style-type: none;">';
-                        inList = true;
+            blocks.forEach(block => {
+                const trimmedBlock = block.trim();
+                if (!trimmedBlock) return;
+
+                // Split block into lines for internal inspection
+                const lines = trimmedBlock.split('\n').map(l => l.trim()).filter(l => l);
+                if (lines.length === 0) return;
+
+                const firstLine = lines[0];
+
+                // 1. Check for Headings starting with #
+                if (firstLine.startsWith('# ')) {
+                    result += `<h3 style="color: #f39c12; margin: 30px 0 15px 0; font-size: 21px; font-weight: 800; border-bottom: 3px solid rgba(243, 156, 18, 0.15); padding-bottom: 8px;">${firstLine.substring(2).trim()}</h3>`;
+                    if (lines.length > 1) {
+                        const remainingText = lines.slice(1).join(' ');
+                        result += formatParagraph(remainingText);
                     }
-                    var liText = t.substring(2).replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>');
-                    result += '<li style="margin-bottom: 12px; position: relative; padding-right: 20px; font-size: 16px; line-height: 1.9; color: #2c3e50;"><span style="color: #f39c12; font-weight: bold; position: absolute; right: 0; top: 0;">\u2022</span>' + liText + '</li>';
+                } 
+                else if (firstLine.startsWith('## ') || firstLine.startsWith('### ')) {
+                    const headingText = firstLine.replace(/^#+\s+/, '').trim();
+                    result += `<h4 style="color: #0d1e3d; margin: 25px 0 12px 0; font-size: 18px; font-weight: 700;">${headingText}</h4>`;
+                    if (lines.length > 1) {
+                        const remainingText = lines.slice(1).join(' ');
+                        result += formatParagraph(remainingText);
+                    }
                 }
-                // Blockquotes
-                else if (t.startsWith('> ')) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += '<blockquote style="border-right: 4px solid #f39c12; padding: 15px 25px; margin: 25px 0; font-style: italic; color: #555; background: rgba(243, 156, 18, 0.04); border-radius: 6px;">' + t.substring(2) + '</blockquote>';
+                // 2. Check for Blockquotes starting with >
+                else if (firstLine.startsWith('> ')) {
+                    const quoteText = lines.map(l => l.startsWith('> ') ? l.substring(2).trim() : l).join(' ');
+                    result += `<blockquote style="border-right: 4px solid #f39c12; padding: 15px 25px; margin: 25px 0; font-style: italic; color: #555; background: rgba(243, 156, 18, 0.04); border-radius: 6px;">${quoteText}</blockquote>`;
                 }
-                // Numbered headings or Arabic ordinals (short lines)
-                else if (/^(\d+[\.\-\)]|\u0623\u0648\u0644\u0627\u064b[:\s]|\u062b\u0627\u0646\u064a\u0627\u064b[:\s]|\u062b\u0627\u0644\u062b\u0627\u064b[:\s]|\u0631\u0627\u0628\u0639\u0627\u064b[:\s]|\u062e\u0627\u0645\u0633\u0627\u064b[:\s]|\u0633\u0627\u062f\u0633\u0627\u064b[:\s]|\u0633\u0627\u0628\u0639\u0627\u064b[:\s]|\u062b\u0627\u0645\u0646\u0627\u064b[:\s]|\u062a\u0627\u0633\u0639\u0627\u064b[:\s]|\u0639\u0627\u0634\u0631\u0627\u064b[:\s])/.test(t) && t.length < 120) {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    result += '<h3 style="color: #f39c12; margin: 28px 0 14px 0; font-size: 19px; font-weight: 700;">' + t + '</h3>';
+                // 3. Check for lists (if every line starts with list markers)
+                else if (lines.every(l => l.startsWith('*') || l.startsWith('-') || l.startsWith('•') || l.startsWith('+') || /^\d+[\.\-\)]/.test(l))) {
+                    result += '<ul style="margin: 20px 20px 25px 0; padding-right: 25px; list-style-type: none;">';
+                    lines.forEach(l => {
+                        let itemText = l.replace(/^([\*\-\+•]|\d+[\.\-\)])\s*/, '').trim();
+                        itemText = itemText.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>');
+                        result += `<li style="margin-bottom: 12px; position: relative; padding-right: 20px; font-size: 16px; line-height: 1.9; color: #2c3e50;"><span style="color: #f39c12; font-weight: bold; position: absolute; right: 0; top: 0;">•</span>${itemText}</li>`;
+                    });
+                    result += '</ul>';
                 }
-                // Regular paragraph
+                // 4. Check for Arabic ordinals or short numbered headings or lines ending with colon
+                else if ((firstLine.endsWith(':') || /^(\d+[\.\-\)]|أولاً|اولا|أولا|ثانياً|ثانيا|ثالثاً|ثالثا|رابعاً|رابعا|خامساً|خامسا|سادساً|سادسا|سابعاً|سابعا|ثامناً|ثامنا|تاسعاً|تاسعا|عاشراً|عاشرا)([:\s\-\.]|$)/.test(firstLine)) && firstLine.length < 100) {
+                    result += `<h3 style="color: #f39c12; margin: 28px 0 14px 0; font-size: 19px; font-weight: 700;">${firstLine}</h3>`;
+                    if (lines.length > 1) {
+                        const remainingText = lines.slice(1).join(' ');
+                        result += formatParagraph(remainingText);
+                    }
+                }
+                // 5. Treat the block as a single paragraph
                 else {
-                    if (inList) { result += '</ul>'; inList = false; }
-                    var formatted = t
-                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>')
-                        .replace(/"([^"]+)"/g, '<span style="color: #f39c12; font-weight: 600;">"$1"</span>');
-                    result += '<p style="font-size: 16.5px; line-height: 2; margin-bottom: 18px; color: #2c3e50; text-align: justify;">' + formatted + '</p>';
+                    const paragraphText = lines.join(' ');
+                    result += formatParagraph(paragraphText);
                 }
             });
-            if (inList) result += '</ul>';
+
             return result;
+        }
+
+        // Helper to format a single paragraph text block with bolding, quotes, etc.
+        function formatParagraph(text) {
+            if (!text || !text.trim()) return '';
+            let formatted = text.trim()
+                .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>')
+                .replace(/"([^"]+)"/g, '<span style="color: #f39c12; font-weight: 600;">"$1"</span>')
+                .replace(/«([^»]+)»/g, '<span style="color: #f39c12; font-weight: 600;">«$1»</span>');
+            return `<p style="font-size: 16.5px; line-height: 2; margin-bottom: 18px; color: #2c3e50; text-align: justify;">${formatted}</p>`;
         }
 
         async function fetchSupabasePosts() {
