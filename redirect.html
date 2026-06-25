@@ -473,7 +473,10 @@
             })
             .then(data => {
                 if (data && data.length > 0 && data[0][platform.dbColumn] && data[0][platform.dbColumn] !== '#') {
-                    const targetUrl = data[0][platform.dbColumn].trim();
+                    let targetUrl = data[0][platform.dbColumn].trim();
+                    if (!/^https?:\/\//i.test(targetUrl)) {
+                        targetUrl = 'https://' + targetUrl;
+                    }
                     statusText.textContent = platform.message;
                     startRedirect(targetUrl);
                 } else {
