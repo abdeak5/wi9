@@ -2054,6 +2054,8 @@
             }
         }
 </style>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- Reading Progress Bar -->
@@ -2343,6 +2345,20 @@
             <!-- COLUMN 3: LEFT SIDEBAR (ABOUT & WHY US) -->
             <aside class="left-sidebar-col">
                 
+                <!-- Google AdSense - Sidebar Ad -->
+                <div class="sidebar-card ad-widget" style="padding: 10px; text-align: center; background: transparent; box-shadow: none; border: none;">
+                    <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-1234567890123456"
+                         data-ad-slot="1111111111"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+
                 <!-- About Widget -->
                 <div class="sidebar-card about-widget">
                     <div class="sidebar-card-header" style="border-bottom: none; padding-bottom: 0;">
@@ -3623,6 +3639,28 @@
                 }).join('');
                 const imgSrc = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
 
+                // Helper to insert middle ad in post content
+                function insertMiddleAd(content) {
+                    const adCode = '<div class="post-ad-wrapper" style="margin: 30px 0; text-align: center;">' +
+                        '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
+                        '<ins class="adsbygoogle"' +
+                        ' style="display:block"' +
+                        ' data-ad-client="ca-pub-1234567890123456"' +
+                        ' data-ad-slot="2222222222"' +
+                        ' data-ad-format="auto"' +
+                        ' data-full-width-responsive="true"></ins>' +
+                        '</div>';
+                    const paragraphs = content.split('</p>');
+                    if (paragraphs.length > 3) {
+                        const middleIndex = Math.floor(paragraphs.length / 2);
+                        paragraphs[middleIndex] = paragraphs[middleIndex] + '</p>' + adCode;
+                        return paragraphs.join('</p>');
+                    }
+                    return content + adCode;
+                }
+
+                const processedContent = insertMiddleAd(post.content);
+
                 singlePostView.innerHTML =
                     '<button class="single-post-back-btn" onclick="window.location.hash=\'home\';">' +
                         '<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>' +
@@ -3645,7 +3683,31 @@
                             '</span>' +
                         '</div>' +
                     '</header>' +
-                    '<article class="single-post-content">' + post.content + '</article>' +
+                    
+                    // Google AdSense - Top Post Ad
+                    '<div class="post-ad-wrapper" style="margin: 20px 0; text-align: center;">' +
+                        '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
+                        '<ins class="adsbygoogle"' +
+                        ' style="display:block"' +
+                        ' data-ad-client="ca-pub-1234567890123456"' +
+                        ' data-ad-slot="2222222222"' +
+                        ' data-ad-format="auto"' +
+                        ' data-full-width-responsive="true"></ins>' +
+                    '</div>' +
+                    
+                    '<article class="single-post-content">' + processedContent + '</article>' +
+                    
+                    // Google AdSense - Bottom Post Ad
+                    '<div class="post-ad-wrapper" style="margin: 35px 0 20px 0; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">' +
+                        '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
+                        '<ins class="adsbygoogle"' +
+                        ' style="display:block"' +
+                        ' data-ad-client="ca-pub-1234567890123456"' +
+                        ' data-ad-slot="3333333333"' +
+                        ' data-ad-format="auto"' +
+                        ' data-full-width-responsive="true"></ins>' +
+                    '</div>' +
+                    
                     '<div class="comments-section-wrapper">' +
                         '<div class="comments-header">' +
                             '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>' +
@@ -3843,6 +3905,16 @@
 
                     loadComments();
                 })();
+
+                // Push Google AdSense ads dynamically
+                const adElements = singlePostView.querySelectorAll('.adsbygoogle');
+                adElements.forEach(function(el) {
+                    try {
+                        (window.adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch(e) {
+                        console.error('AdSense push error:', e);
+                    }
+                });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Trigger scroll event to calculate progress immediately
                 window.dispatchEvent(new Event('scroll'));
