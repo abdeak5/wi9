@@ -2133,8 +2133,97 @@
             }
         }
 </style>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous"></script>
+        <!-- Google AdSense Dynamic Loader -->
+    <script>
+        (function() {
+            window.adConfig = {
+                enabled: true,
+                client: 'ca-pub-1234567890123456',
+                slots: {
+                    sidebar: '1111111111',
+                    top: '2222222222',
+                    middle: '2222222222',
+                    bottom: '3333333333',
+                    inner_footer: '4444444444'
+                }
+            };
+
+            const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+            const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+            // Function to render ads dynamically
+            window.renderAdSenseUnit = function(container, slotType) {
+                if (!container) return;
+                
+                function applyConfig() {
+                    if (!window.adConfig.enabled) {
+                        container.style.display = 'none';
+                        return;
+                    }
+                    const ins = container.querySelector('.adsbygoogle');
+                    if (ins) {
+                        ins.setAttribute('data-ad-client', window.adConfig.client);
+                        ins.setAttribute('data-ad-slot', window.adConfig.slots[slotType]);
+                        ins.style.display = 'block';
+                    }
+                    try {
+                        (window.adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch(e) {
+                        console.error('AdSense push error:', e);
+                    }
+                }
+
+                if (window.adConfigLoaded) {
+                    applyConfig();
+                } else {
+                    document.addEventListener('adConfigReady', applyConfig);
+                }
+            };
+
+            // Fetch config from Supabase
+            fetch(supabaseUrl + '/rest/v1/adsense_config?id=eq.1&select=*', {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': 'Bearer ' + supabaseKey
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const config = data[0];
+                    window.adConfig.enabled = config.ads_enabled;
+                    window.adConfig.client = config.client_id;
+                    window.adConfig.slots.sidebar = config.slot_sidebar;
+                    window.adConfig.slots.top = config.slot_top;
+                    window.adConfig.slots.middle = config.slot_middle;
+                    window.adConfig.slots.bottom = config.slot_bottom;
+                    window.adConfig.slots.inner_footer = config.slot_inner_footer;
+                }
+                triggerReady();
+            })
+            .catch(err => {
+                console.warn('Could not load ad settings from Supabase, using defaults:', err);
+                triggerReady();
+            });
+
+            function triggerReady() {
+                window.adConfigLoaded = true;
+                document.dispatchEvent(new Event('adConfigReady'));
+                
+                if (window.adConfig.enabled) {
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + window.adConfig.client;
+                    script.crossOrigin = 'anonymous';
+                    document.head.appendChild(script);
+                } else {
+                    const style = document.createElement('style');
+                    style.innerHTML = '.adsbygoogle, .post-ad-wrapper, .ad-widget, .page-ad-wrapper { display: none !important; }';
+                    document.head.appendChild(style);
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- ==================== 1. TOP BAR ==================== -->
@@ -2259,12 +2348,12 @@
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>
                     <ins class="adsbygoogle"
                          style="display:block"
-                         data-ad-client="ca-pub-1234567890123456"
-                         data-ad-slot="4444444444"
                          data-ad-format="auto"
                          data-full-width-responsive="true"></ins>
                     <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({});
+                         if (typeof window.renderAdSenseUnit === 'function') {
+                             window.renderAdSenseUnit(document.currentScript.parentElement, 'inner_footer');
+                         }
                     </script>
                 </div>
             </div>

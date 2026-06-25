@@ -2054,8 +2054,97 @@
             }
         }
 </style>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous"></script>
+        <!-- Google AdSense Dynamic Loader -->
+    <script>
+        (function() {
+            window.adConfig = {
+                enabled: true,
+                client: 'ca-pub-1234567890123456',
+                slots: {
+                    sidebar: '1111111111',
+                    top: '2222222222',
+                    middle: '2222222222',
+                    bottom: '3333333333',
+                    inner_footer: '4444444444'
+                }
+            };
+
+            const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+            const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+            // Function to render ads dynamically
+            window.renderAdSenseUnit = function(container, slotType) {
+                if (!container) return;
+                
+                function applyConfig() {
+                    if (!window.adConfig.enabled) {
+                        container.style.display = 'none';
+                        return;
+                    }
+                    const ins = container.querySelector('.adsbygoogle');
+                    if (ins) {
+                        ins.setAttribute('data-ad-client', window.adConfig.client);
+                        ins.setAttribute('data-ad-slot', window.adConfig.slots[slotType]);
+                        ins.style.display = 'block';
+                    }
+                    try {
+                        (window.adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch(e) {
+                        console.error('AdSense push error:', e);
+                    }
+                }
+
+                if (window.adConfigLoaded) {
+                    applyConfig();
+                } else {
+                    document.addEventListener('adConfigReady', applyConfig);
+                }
+            };
+
+            // Fetch config from Supabase
+            fetch(supabaseUrl + '/rest/v1/adsense_config?id=eq.1&select=*', {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': 'Bearer ' + supabaseKey
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const config = data[0];
+                    window.adConfig.enabled = config.ads_enabled;
+                    window.adConfig.client = config.client_id;
+                    window.adConfig.slots.sidebar = config.slot_sidebar;
+                    window.adConfig.slots.top = config.slot_top;
+                    window.adConfig.slots.middle = config.slot_middle;
+                    window.adConfig.slots.bottom = config.slot_bottom;
+                    window.adConfig.slots.inner_footer = config.slot_inner_footer;
+                }
+                triggerReady();
+            })
+            .catch(err => {
+                console.warn('Could not load ad settings from Supabase, using defaults:', err);
+                triggerReady();
+            });
+
+            function triggerReady() {
+                window.adConfigLoaded = true;
+                document.dispatchEvent(new Event('adConfigReady'));
+                
+                if (window.adConfig.enabled) {
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + window.adConfig.client;
+                    script.crossOrigin = 'anonymous';
+                    document.head.appendChild(script);
+                } else {
+                    const style = document.createElement('style');
+                    style.innerHTML = '.adsbygoogle, .post-ad-wrapper, .ad-widget, .page-ad-wrapper { display: none !important; }';
+                    document.head.appendChild(style);
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Reading Progress Bar -->
@@ -2350,12 +2439,12 @@
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>
                     <ins class="adsbygoogle"
                          style="display:block"
-                         data-ad-client="ca-pub-1234567890123456"
-                         data-ad-slot="1111111111"
                          data-ad-format="auto"
                          data-full-width-responsive="true"></ins>
                     <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({});
+                         if (typeof window.renderAdSenseUnit === 'function') {
+                             window.renderAdSenseUnit(document.currentScript.parentElement, 'sidebar');
+                         }
                     </script>
                 </div>
 
@@ -3424,74 +3513,114 @@
             }
         }
 
-        window.loadBloggerPostsCallback = function(data) {
+        async function fetchSupabasePosts() {
+            const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+            const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
             try {
-                if (!data || !data.feed || !data.feed.entry) {
-                    console.warn('لا توجد تدوينات في الخلاصة');
-                    loadPostsFromCacheFallback();
-                    return;
+                const response = await fetch(supabaseUrl + '/rest/v1/posts?order=created_at.desc', {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': 'Bearer ' + supabaseKey
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Supabase fetch error');
                 }
-
-                const entries = data.feed.entry;
-                allPosts = entries.map((entry) => {
-                    const title = entry.title ? entry.title['$t'] : 'بدون عنوان';
-                    const content = entry.content ? entry.content['$t'] : (entry.summary ? entry.summary['$t'] : '');
-                    const publishDate = entry.published ? entry.published['$t'] : '';
-                    const categories = entry.category ? entry.category.map(cat => cat.term) : ['???'];
-                    const altLink = entry.link ? entry.link.find(l => l.rel === 'alternate') : null;
-                    const originalLink = altLink ? altLink.href : '#';
-
-                    const rawId = entry.id ? entry.id['$t'] : '';
-                    const postId = rawId.split('.post-')[1] || rawId.split('/').pop() || Math.random().toString(36).substr(2, 9);
-
-                    // Helper to get high-res Blogger image
-                    function getHighResImage(url) {
-                        if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
-                        if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
-                            if (url.includes('=')) {
-                                return url.split('=')[0] + '=s800';
-                            }
-                            return url.replace(/\/s[0-9]+(-[chw])?\//, '/s800/').replace(/\/w[0-9]+-h[0-9]+[^\/]*\//, '/s800/');
-                        }
-                        return url;
-                    }
-
-                    // Extract image from content
-                    let image = '';
-                    if (entry['media$thumbnail']) {
-                        image = getHighResImage(entry['media$thumbnail'].url);
-                    } else {
-                        const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
-                        if (imgMatch) {
-                            image = getHighResImage(imgMatch[1]);
-                        }
-                    }
-                    if (!image) {
-                        image = 'https://files.catbox.moe/ru6efb.jpeg';
-                    }
-
-                    // Generate excerpt from content
+                const data = await response.json();
+                return data.map(post => {
                     const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content;
+                    tempDiv.innerHTML = post.content;
                     const excerpt = tempDiv.textContent.substring(0, 150).trim() + '...';
-
+                    
                     return {
-                        id: postId,
-                        title: title,
-                        content: content,
+                        id: 'sb-' + post.id,
+                        title: post.title,
+                        content: post.content,
                         excerpt: excerpt,
-                        publishDate: publishDate,
-                        categories: categories,
-                        originalLink: originalLink,
-                        image: image
+                        publishDate: post.created_at || new Date().toISOString(),
+                        categories: post.categories || [],
+                        originalLink: '#',
+                        image: post.image || 'https://files.catbox.moe/ru6efb.jpeg'
                     };
                 });
+            } catch(e) {
+                console.error('Error fetching posts from Supabase:', e);
+                return [];
+            }
+        }
+
+        window.loadBloggerPostsCallback = async function(data) {
+            try {
+                let bloggerPosts = [];
+                if (data && data.feed && data.feed.entry) {
+                    const entries = data.feed.entry;
+                    bloggerPosts = entries.map((entry) => {
+                        const title = entry.title ? entry.title['$t'] : 'بدون عنوان';
+                        const content = entry.content ? entry.content['$t'] : (entry.summary ? entry.summary['$t'] : '');
+                        const publishDate = entry.published ? entry.published['$t'] : '';
+                        const categories = entry.category ? entry.category.map(cat => cat.term) : ['???'];
+                        const altLink = entry.link ? entry.link.find(l => l.rel === 'alternate') : null;
+                        const originalLink = altLink ? altLink.href : '#';
+
+                        const rawId = entry.id ? entry.id['$t'] : '';
+                        const postId = rawId.split('.post-')[1] || rawId.split('/').pop() || Math.random().toString(36).substr(2, 9);
+
+                        // Helper to get high-res Blogger image
+                        function getHighResImage(url) {
+                            if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
+                            if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
+                                if (url.includes('=')) {
+                                    return url.split('=')[0] + '=s800';
+                                }
+                                return url.replace(/\/s[0-9]+(-[chw])?\//, '/s800/').replace(/\/w[0-9]+-h[0-9]+[^\/]*\//, '/s800/');
+                            }
+                            return url;
+                        }
+
+                        // Extract image from content
+                        let image = '';
+                        if (entry['media$thumbnail']) {
+                            image = getHighResImage(entry['media$thumbnail'].url);
+                        } else {
+                            const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                            if (imgMatch) {
+                                image = getHighResImage(imgMatch[1]);
+                            }
+                        }
+                        if (!image) {
+                            image = 'https://files.catbox.moe/ru6efb.jpeg';
+                        }
+
+                        // Generate excerpt from content
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = content;
+                        const excerpt = tempDiv.textContent.substring(0, 150).trim() + '...';
+
+                        return {
+                            id: postId,
+                            title: title,
+                            content: content,
+                            excerpt: excerpt,
+                            publishDate: publishDate,
+                            categories: categories,
+                            originalLink: originalLink,
+                            image: image
+                        };
+                    });
+                }
+
+                // Fetch Supabase posts
+                const supabasePosts = await fetchSupabasePosts();
+
+                // Merge and sort
+                allPosts = [...supabasePosts, ...bloggerPosts];
+                allPosts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
 
                 // Cache the posts
                 localStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
                 localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
 
-                console.log('تم جلب ' + allPosts.length + ' تدوينة بنجاح.');
+                console.log('تم جلب ' + allPosts.length + ' تدوينة (بما في ذلك ' + supabasePosts.length + ' من قاعدة البيانات) بنجاح.');
 
                 renderCategoriesMenu();
                 renderPostsGrid();
@@ -3641,12 +3770,10 @@
 
                 // Helper to insert middle ad in post content
                 function insertMiddleAd(content) {
-                    const adCode = '<div class="post-ad-wrapper" style="margin: 30px 0; text-align: center;">' +
+                    const adCode = '<div class="post-ad-wrapper middle-post-ad" style="margin: 30px 0; text-align: center;">' +
                         '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
                         '<ins class="adsbygoogle"' +
                         ' style="display:block"' +
-                        ' data-ad-client="ca-pub-1234567890123456"' +
-                        ' data-ad-slot="2222222222"' +
                         ' data-ad-format="auto"' +
                         ' data-full-width-responsive="true"></ins>' +
                         '</div>';
@@ -3685,12 +3812,10 @@
                     '</header>' +
                     
                     // Google AdSense - Top Post Ad
-                    '<div class="post-ad-wrapper" style="margin: 20px 0; text-align: center;">' +
+                    '<div class="post-ad-wrapper top-post-ad" style="margin: 20px 0; text-align: center;">' +
                         '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
                         '<ins class="adsbygoogle"' +
                         ' style="display:block"' +
-                        ' data-ad-client="ca-pub-1234567890123456"' +
-                        ' data-ad-slot="2222222222"' +
                         ' data-ad-format="auto"' +
                         ' data-full-width-responsive="true"></ins>' +
                     '</div>' +
@@ -3698,12 +3823,10 @@
                     '<article class="single-post-content">' + processedContent + '</article>' +
                     
                     // Google AdSense - Bottom Post Ad
-                    '<div class="post-ad-wrapper" style="margin: 35px 0 20px 0; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">' +
+                    '<div class="post-ad-wrapper bottom-post-ad" style="margin: 35px 0 20px 0; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">' +
                         '<div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>' +
                         '<ins class="adsbygoogle"' +
                         ' style="display:block"' +
-                        ' data-ad-client="ca-pub-1234567890123456"' +
-                        ' data-ad-slot="3333333333"' +
                         ' data-ad-format="auto"' +
                         ' data-full-width-responsive="true"></ins>' +
                     '</div>' +
@@ -3909,6 +4032,19 @@
                 // Push Google AdSense ads dynamically
                 const adElements = singlePostView.querySelectorAll('.adsbygoogle');
                 adElements.forEach(function(el) {
+                    if (window.adConfig && window.adConfig.enabled) {
+                        el.setAttribute('data-ad-client', window.adConfig.client);
+                        const wrapper = el.closest('.post-ad-wrapper');
+                        if (wrapper) {
+                            if (wrapper.classList.contains('top-post-ad')) {
+                                el.setAttribute('data-ad-slot', window.adConfig.slots.top);
+                            } else if (wrapper.classList.contains('bottom-post-ad')) {
+                                el.setAttribute('data-ad-slot', window.adConfig.slots.bottom);
+                            } else {
+                                el.setAttribute('data-ad-slot', window.adConfig.slots.middle);
+                            }
+                        }
+                    }
                     try {
                         (window.adsbygoogle = window.adsbygoogle || []).push({});
                     } catch(e) {

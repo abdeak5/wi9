@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | وقاية برو</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0d1e3d;
+            --primary-light: #172a4d;
+            --accent-orange: #e05624;
+            --accent-orange-hover: #f16837;
+            --text-light: #ffffff;
+            --text-muted: #a0aec0;
+            --bg-dark: #060f24;
+            --card-bg: rgba(23, 42, 77, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --success: #2ec4b6;
+            --error: #e71d36;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 10% 20%, rgba(13, 30, 61, 0.6) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(224, 86, 36, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Password Modal */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(6, 15, 36, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--primary-light);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .auth-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .auth-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-light);
+        }
+
+        .logo-img {
+            height: 50px;
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        .logo-text span {
+            font-size: 11px;
+            color: var(--accent-orange);
+            display: block;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--error);
+            color: var(--text-light);
+            background: rgba(231, 29, 54, 0.1);
+        }
+
+        /* Container & Tabs */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 0 20px;
+            flex-grow: 1;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-orange);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--accent-orange);
+            border-radius: 3px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card styles */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title span {
+            color: var(--accent-orange);
+        }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(6, 15, 36, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: var(--text-light);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(224, 86, 36, 0.2);
+        }
+
+        /* Toggle switch */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-orange);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .switch-label {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--accent-orange);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-orange-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.05);
+            border-color: var(--text-muted);
+        }
+
+        /* Image preview area */
+        .image-upload-wrapper {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .image-upload-wrapper:hover {
+            border-color: var(--accent-orange);
+            background: rgba(224, 86, 36, 0.05);
+        }
+
+        .image-upload-preview {
+            max-height: 150px;
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        /* Alerts & Status Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: rgba(46, 196, 182, 0.1);
+            border: 1px solid var(--success);
+            color: #d1f7f4;
+        }
+
+        .alert-error {
+            background-color: rgba(231, 29, 54, 0.1);
+            border: 1px solid var(--error);
+            color: #ffd6db;
+        }
+
+        /* SQL helper styling */
+        pre {
+            background: rgba(6, 15, 36, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            color: #d8dee9;
+            margin-bottom: 15px;
+        }
+
+        /* Article Live Preview Modal */
+        #preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(6, 15, 36, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .preview-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-light);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .preview-close:hover {
+            background: var(--error);
+        }
+
+        .preview-content {
+            margin-top: 20px;
+        }
+
+        .preview-header-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .preview-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .preview-badge {
+            display: inline-block;
+            background: rgba(224, 86, 36, 0.15);
+            color: var(--accent-orange);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .preview-body-text {
+            font-size: 16px;
+            line-height: 2;
+            color: #d1d8e0;
+        }
+
+        .preview-body-text p {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Authentication Overlay -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <img class="auth-logo" src="https://files.catbox.moe/bqi01n.png" alt="وقاية برو">
+            <h2 class="auth-title">لوحة التحكم وقاية برو</h2>
+            <p class="auth-desc">الرجاء إدخال رمز المرور لمتابعة إدارة الموقع</p>
+            <div class="form-group">
+                <input type="password" id="auth-pin" placeholder="رمز المرور (الافتراضي: admin123)">
+            </div>
+            <button class="btn" style="width: 100%;" onclick="validatePin()">دخول</button>
+            <p id="auth-error" style="color: var(--error); font-size: 12px; margin-top: 15px; display: none;">رمز المرور غير صحيح!</p>
+        </div>
+    </div>
+
+    <!-- 2. Header Area -->
+    <header>
+        <a class="logo-area" href="../index.html">
+            <img class="logo-img" src="https://files.catbox.moe/bqi01n.png" alt="شعار وقاية برو">
+            <div class="logo-text">
+                <h1>وقاية برو</h1>
+                <span>لوحة التحكم والإدارة الفنية</span>
+            </div>
+        </a>
+        <button class="logout-btn" onclick="logout()">خروج</button>
+    </header>
+
+    <!-- 3. Main Dashboard Body -->
+    <div class="container">
+        <!-- Tabs Buttons -->
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab(event, 'ads-tab')">إدارة إعلانات AdSense</button>
+            <button class="tab-btn" onclick="switchTab(event, 'post-tab')">نشر تدوينة جديدة</button>
+            <button class="tab-btn" onclick="switchTab(event, 'supabase-tab')">تهيئة قاعدة البيانات Supabase</button>
+        </div>
+
+        <!-- Alert messages -->
+        <div id="alert-msg" class="alert"></div>
+
+        <!-- TAB 1: AdSense Management -->
+        <div id="ads-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-title">
+                    <span>⚡</span> إعدادات إعلانات AdSense المتصلة بقاعدة البيانات
+                </div>
+                
+                <div class="switch-container">
+                    <span class="switch-label">حالة الإعلانات في الموقع:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="ads-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span id="ads-status-text" style="font-weight: 700; color: var(--success);">مفعّلة</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="ad-client-id">معرف العميل الناشر (AdSense Client ID)</label>
+                        <input type="text" id="ad-client-id" placeholder="مثال: ca-pub-1234567890123456">
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-sidebar-slot">فتحة إعلان الشريط الجانبي (Sidebar Slot ID)</label>
+                        <input type="text" id="ad-sidebar-slot" placeholder="مثال: 1111111111">
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-top-slot">فتحة إعلان المقال العلوي (Top Post Slot ID)</label>
+                        <input type="text" id="ad-top-slot" placeholder="مثال: 2222222222">
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-middle-slot">فتحة إعلان المقال الأوسط (Middle Post Slot ID)</label>
+                        <input type="text" id="ad-middle-slot" placeholder="مثال: 2222222222">
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-bottom-slot">فتحة إعلان المقال السفلي (Bottom Post Slot ID)</label>
+                        <input type="text" id="ad-bottom-slot" placeholder="مثال: 3333333333">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="ad-inner-footer-slot">فتحة إعلانات ذيل الصفحات الفرعية (Inner Pages Footer Slot ID)</label>
+                        <input type="text" id="ad-inner-footer-slot" placeholder="مثال: 4444444444">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn" id="save-ads-btn" onclick="saveAdSettings()">حفظ وتحديث الإعلانات</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Publish New Post -->
+        <div id="post-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>✍️</span> كتابة ونشر مقال جديد باحترافية
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="post-title">عنوان المقال *</label>
+                        <input type="text" id="post-title" required placeholder="أدخل عنوان المقال المشوق والواضح...">
+                    </div>
+                    <div class="form-group">
+                        <label for="post-category">تصنيف المقال *</label>
+                        <select id="post-category">
+                            <option value="السلامة المهنية">السلامة المهنية</option>
+                            <option value="أنظمة مكافحة الحريق">أنظمة مكافحة الحريق</option>
+                            <option value="الفحص والاختبار (ITM)">الفحص والاختبار (ITM)</option>
+                            <option value="custom">تصنيف مخصص...</option>
+                        </select>
+                        <input type="text" id="post-custom-category" placeholder="اكتب التصنيف المخصص هنا..." style="margin-top: 10px; display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="post-readtime">مدة القراءة المقدرة (دقائق) - اتركها فارغة لحسابها تلقائياً</label>
+                        <input type="text" id="post-readtime" placeholder="مثال: 5">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="post-image-url">صورة الغلاف (رابط مباشر أو قم برفع ملف)</label>
+                        <input type="text" id="post-image-url" placeholder="مثال: https://files.catbox.moe/example.png">
+                        
+                        <div class="image-upload-wrapper" onclick="document.getElementById('post-image-file').click()">
+                            <p style="font-size: 13px; color: var(--text-muted);">اسحب وأسقط أو انقر لرفع صورة الغلاف مباشرة (ستتحول تلقائياً إلى صيغة قاعدة البيانات)</p>
+                            <input type="file" id="post-image-file" style="display: none;" accept="image/*" onchange="previewUploadedImage(event)">
+                            <img id="image-preview" class="image-upload-preview" src="#" alt="معاينة الصورة">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="margin-bottom: 0;">نص المقال والفقرات *</label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="switch" style="width: 35px; height: 20px; margin-bottom:0;">
+                                    <input type="checkbox" id="auto-format-toggle" checked>
+                                    <span class="slider" style="border-radius: 20px;"></span>
+                                </label>
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">تنسيق تلقائي للمقال (عناوين، فقرات، قوائم)</span>
+                            </div>
+                        </div>
+                        <textarea id="post-content" rows="12" placeholder="اكتب نص المقال كاملاً هنا. إذا كان التنسيق التلقائي مفعلاً، يمكنك ببساطة كتابة عناوينك مسبوقة بـ # أو أرقام، والفقرات مفصولة بسطر فارغ وسيتولى النظام تنسيقها بأناقة..."></textarea>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <button class="btn" id="publish-btn" onclick="publishPost()">نشر المقال الآن</button>
+                    <button class="btn btn-secondary" onclick="openLivePreview()">معاينة حية للمقال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Database Setup -->
+        <div id="supabase-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>⚙️</span> تهيئة قاعدة البيانات والـ SQL في Supabase
+                </div>
+                <p style="font-size: 13px; line-height: 1.8; color: var(--text-muted); margin-bottom: 20px;">
+                    لتخزين إعدادات الإعلانات ومقالاتك المنشورة ديناميكياً، يرجى نسخ الكود التالي ووضعه في محرّر الاستعلامات **(SQL Editor)** في لوحة تحكم حسابك على **Supabase** لتأسيس الجداول وإعطاء الصلاحيات الفورية لزوار الموقع للقراءة والكتابة:
+                </p>
+                
+                <pre><code>-- 1. جدول إعدادات الإعلانات adsense_config
+CREATE TABLE IF NOT EXISTS adsense_config (
+    id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    client_id text DEFAULT 'ca-pub-1234567890123456',
+    slot_sidebar text DEFAULT '1111111111',
+    slot_top text DEFAULT '2222222222',
+    slot_middle text DEFAULT '2222222222',
+    slot_bottom text DEFAULT '3333333333',
+    slot_inner_footer text DEFAULT '4444444444',
+    ads_enabled boolean DEFAULT true,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- إدخال الصف الافتراضي
+INSERT INTO adsense_config (id, client_id, slot_sidebar, slot_top, slot_middle, slot_bottom, slot_inner_footer, ads_enabled)
+VALUES (1, 'ca-pub-1234567890123456', '1111111111', '2222222222', '2222222222', '3333333333', '4444444444', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- تفعيل سياسات الأمان RLS
+ALTER TABLE adsense_config ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon read" ON adsense_config FOR SELECT USING (true);
+CREATE POLICY "Allow anon update" ON adsense_config FOR UPDATE USING (true);
+CREATE POLICY "Allow anon insert" ON adsense_config FOR INSERT WITH CHECK (true);
+
+-- 2. جدول المقالات والتدوينات posts
+CREATE TABLE IF NOT EXISTS posts (
+    id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    title text NOT NULL,
+    content text NOT NULL,
+    categories text[] DEFAULT '{}'::text[],
+    image text,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- تفعيل سياسات الأمان RLS للمقالات
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon read posts" ON posts FOR SELECT USING (true);
+CREATE POLICY "Allow anon insert posts" ON posts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anon update posts" ON posts FOR UPDATE USING (true);
+CREATE POLICY "Allow anon delete posts" ON posts FOR DELETE USING (true);</code></pre>
+                
+                <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.querySelector('pre code').innerText); alert('تم نسخ كود SQL بنجاح!')">
+                    نسخ كود SQL بالكامل
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Live Preview Modal -->
+    <div id="preview-modal">
+        <div class="preview-container">
+            <button class="preview-close" onclick="closeLivePreview()">✕</button>
+            <div class="preview-content">
+                <img id="preview-img-target" class="preview-header-img" src="https://files.catbox.moe/ru6efb.jpeg" alt="الغلاف">
+                <span id="preview-badge-target" class="preview-badge">السلامة المهنية</span>
+                <h1 id="preview-title-target" class="preview-title">عنوان المقال هنا</h1>
+                <div id="preview-body-target" class="preview-body-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+        const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+        let encodedImage = '';
+
+        // Session validation
+        window.onload = function() {
+            if (sessionStorage.getItem('wiqayah_authenticated') === 'true') {
+                document.getElementById('auth-overlay').style.display = 'none';
+                loadSettings();
+            }
+            
+            // Custom Category Field Show/Hide
+            const categorySelect = document.getElementById('post-category');
+            const customCategoryField = document.getElementById('post-custom-category');
+            categorySelect.addEventListener('change', function() {
+                if (categorySelect.value === 'custom') {
+                    customCategoryField.style.display = 'block';
+                    customCategoryField.required = true;
+                } else {
+                    customCategoryField.style.display = 'none';
+                    customCategoryField.required = false;
+                }
+            });
+
+            // Toggle switch event handler
+            const adsToggle = document.getElementById('ads-toggle');
+            const adsStatusText = document.getElementById('ads-status-text');
+            adsToggle.addEventListener('change', function() {
+                if (adsToggle.checked) {
+                    adsStatusText.textContent = 'مفعّلة';
+                    adsStatusText.style.color = 'var(--success)';
+                } else {
+                    adsStatusText.textContent = 'معطلة';
+                    adsStatusText.style.color = 'var(--error)';
+                }
+            });
+        };
+
+        function validatePin() {
+            const input = document.getElementById('auth-pin').value;
+            // Admin password (Default check)
+            if (input === 'admin123' || input === 'wiqayah123') {
+                sessionStorage.setItem('wiqayah_authenticated', 'true');
+                document.getElementById('auth-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                }, 300);
+                loadSettings();
+            } else {
+                document.getElementById('auth-error').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('wiqayah_authenticated');
+            location.reload();
+        }
+
+        function switchTab(evt, tabId) {
+            const tabcontents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontents.length; i++) {
+                tabcontents[i].className = tabcontents[i].className.replace(" active", "");
+            }
+            const tablinks = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabId).className += " active";
+            evt.currentTarget.className += " active";
+        }
+
+        // Show toast alerts
+        function showAlert(msg, isError = false) {
+            const alertBox = document.getElementById('alert-msg');
+            alertBox.textContent = msg;
+            alertBox.className = `alert ${isError ? 'alert-error' : 'alert-success'}`;
+            alertBox.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 6000);
+        }
+
+        // Fetch settings from Supabase
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/adsense_config?id=eq.1`, {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch settings');
+                
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    const config = data[0];
+                    document.getElementById('ads-toggle').checked = config.ads_enabled;
+                    document.getElementById('ad-client-id').value = config.client_id;
+                    document.getElementById('ad-sidebar-slot').value = config.slot_sidebar;
+                    document.getElementById('ad-top-slot').value = config.slot_top;
+                    document.getElementById('ad-middle-slot').value = config.slot_middle;
+                    document.getElementById('ad-bottom-slot').value = config.slot_bottom;
+                    document.getElementById('ad-inner-footer-slot').value = config.slot_inner_footer;
+                    
+                    // Dispatch change to update label color
+                    document.getElementById('ads-toggle').dispatchEvent(new Event('change'));
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('فشل في جلب إعدادات الإعلانات من Supabase. تأكد من إنشاء الجدول وتفعيل الصلاحيات.', true);
+            }
+        }
+
+        // Save settings to Supabase
+        async function saveAdSettings() {
+            const btn = document.getElementById('save-ads-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الحفظ والتحديث...';
+
+            const payload = {
+                id: 1,
+                ads_enabled: document.getElementById('ads-toggle').checked,
+                client_id: document.getElementById('ad-client-id').value.trim() || 'ca-pub-1234567890123456',
+                slot_sidebar: document.getElementById('ad-sidebar-slot').value.trim() || '1111111111',
+                slot_top: document.getElementById('ad-top-slot').value.trim() || '2222222222',
+                slot_middle: document.getElementById('ad-middle-slot').value.trim() || '2222222222',
+                slot_bottom: document.getElementById('ad-bottom-slot').value.trim() || '3333333333',
+                slot_inner_footer: document.getElementById('ad-inner-footer-slot').value.trim() || '4444444444'
+            };
+
+            try {
+                // We use POST with Resolution merge to upsert
+                const response = await fetch(`${supabaseUrl}/rest/v1/adsense_config`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Database write error');
+
+                showAlert('تم حفظ وتحديث إعدادات إعلانات أدسنس بنجاح وتعميمها على الموقع!');
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء حفظ الإعدادات. تأكد من إعداد صلاحيات RLS بشكل صحيح.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'حفظ وتحديث الإعلانات';
+            }
+        }
+
+        // Base64 file converter
+        function previewUploadedImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                encodedImage = e.target.result;
+                const previewImg = document.getElementById('image-preview');
+                previewImg.src = encodedImage;
+                previewImg.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Auto-formatter helper
+        function autoFormat(text) {
+            if (!text.trim()) return '';
+            
+            const lines = text.split('\n');
+            let result = '';
+            let inList = false;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) {
+                    if (inList) {
+                        result += '</ul>';
+                        inList = false;
+                    }
+                    return;
+                }
+
+                // Headers starting with #
+                if (trimmed.startsWith('# ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<h3 class="post-sub-title" style="color: var(--accent-orange); margin: 30px 0 15px 0; font-size: 20px; font-weight: 700; border-bottom: 2px solid rgba(224, 86, 36, 0.1); padding-bottom: 8px;">${trimmed.substring(2)}</h3>`;
+                } else if (trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<h4 class="post-sub-sub-title" style="color: var(--text-light); margin: 25px 0 10px 0; font-size: 17px; font-weight: 700;">${trimmed.replace(/^#+\s+/, '')}</h4>`;
+                }
+                // Bullet points
+                else if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                    if (!inList) {
+                        result += '<ul style="margin: 20px 20px 20px 0; padding-right: 20px; list-style-type: square; color: #d1d8e0; line-height: 1.8;">';
+                        inList = true;
+                    }
+                    result += `<li style="margin-bottom: 10px;">${trimmed.substring(2)}</li>`;
+                }
+                // Blockquotes
+                else if (trimmed.startsWith('> ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<blockquote style="border-right: 4px solid var(--accent-orange); padding: 5px 15px; margin: 25px 0; font-style: italic; color: var(--text-muted); background: rgba(255,255,255,0.02);">${trimmed.substring(2)}</blockquote>`;
+                }
+                // Short numbered headings or clear points (e.g. 1. / 2. / أولاً: / ثانياً:)
+                else if (/^(\d+\.|أولاً:|ثانياً:|ثالثاً:|رابعاً:|خامساً:)/.test(trimmed) && trimmed.length < 120) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += `<h3 class="post-sub-title" style="color: var(--accent-orange); margin: 30px 0 15px 0; font-size: 19px; font-weight: 700;">${trimmed}</h3>`;
+                }
+                // Regular Paragraph
+                else {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    // Apply highlighting style to text inside quotes or asterisks in paragraphs
+                    let formattedLine = trimmed
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: var(--text-light); font-weight: 700;">$1</strong>')
+                        .replace(/"([^"]+)"/g, '<span style="color: var(--accent-orange); font-weight: 600;">"$1"</span>');
+                    
+                    result += `<p style="font-size: 16px; line-height: 2; margin-bottom: 20px; color: #d1d8e0; text-align: justify;">${formattedLine}</p>`;
+                }
+            });
+
+            if (inList) {
+                result += '</ul>';
+            }
+
+            return result;
+        }
+
+        // Get final content (formatted or raw)
+        function getPostContent() {
+            const rawContent = document.getElementById('post-content').value;
+            const useAutoFormat = document.getElementById('auto-format-toggle').checked;
+            return useAutoFormat ? autoFormat(rawContent) : rawContent;
+        }
+
+        function getSelectedCategory() {
+            const selectVal = document.getElementById('post-category').value;
+            if (selectVal === 'custom') {
+                return document.getElementById('post-custom-category').value.trim() || 'عام';
+            }
+            return selectVal;
+        }
+
+        // Live preview toggle
+        function openLivePreview() {
+            const title = document.getElementById('post-title').value.trim() || 'عنوان المقال التجريبي';
+            const category = getSelectedCategory();
+            const content = getPostContent() || '<p>محتوى المقال سيظهر هنا بشكل منظم وجميل...</p>';
+            const imageUrl = document.getElementById('post-image-url').value.trim() || encodedImage || 'https://files.catbox.moe/ru6efb.jpeg';
+
+            document.getElementById('preview-title-target').textContent = title;
+            document.getElementById('preview-badge-target').textContent = category;
+            document.getElementById('preview-img-target').src = imageUrl;
+            document.getElementById('preview-body-target').innerHTML = content;
+
+            document.getElementById('preview-modal').style.display = 'block';
+        }
+
+        function closeLivePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+        }
+
+        // Publish Post to Supabase
+        async function publishPost() {
+            const title = document.getElementById('post-title').value.trim();
+            const content = getPostContent().trim();
+            const category = getSelectedCategory();
+            const imageUrl = document.getElementById('post-image-url').value.trim() || encodedImage || 'https://files.catbox.moe/ru6efb.jpeg';
+
+            if (!title) {
+                showAlert('يرجى كتابة عنوان المقال أولاً.', true);
+                return;
+            }
+            if (!content) {
+                showAlert('يرجى ملء محتوى المقال النصي.', true);
+                return;
+            }
+
+            const publishBtn = document.getElementById('publish-btn');
+            publishBtn.disabled = true;
+            publishBtn.textContent = 'جاري النشر وتنسيق التدوينة...';
+
+            const payload = {
+                title: title,
+                content: content,
+                categories: [category],
+                image: imageUrl
+            };
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Database write error');
+
+                showAlert('🎉 تم تنسيق ونشر التدوينة بنجاح! ستظهر فوراً على الصفحة الرئيسية والأرشيف للموقع.');
+                
+                // Clear fields
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                document.getElementById('post-image-url').value = '';
+                document.getElementById('post-image-file').value = '';
+                document.getElementById('image-preview').style.display = 'none';
+                encodedImage = '';
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء محاولة نشر المقال. تأكد من إعداد جدول posts والتحقق من RLS.', true);
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.textContent = 'نشر المقال الآن';
+            }
+        }
+    </script>
+</body>
+</html>
