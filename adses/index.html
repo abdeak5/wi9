@@ -599,6 +599,7 @@
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab(event, 'ads-tab')">إدارة إعلانات AdSense</button>
             <button class="tab-btn" onclick="switchTab(event, 'post-tab')">نشر تدوينة جديدة</button>
+            <button class="tab-btn" onclick="switchTab(event, 'manage-posts-tab'); loadManagePosts()">إدارة المقالات</button>
             <button class="tab-btn" onclick="switchTab(event, 'inbox-tab'); loadInboxMessages()">الرسائل الواردة</button>
             <button class="tab-btn" onclick="switchTab(event, 'supabase-tab')">تهيئة قاعدة البيانات Supabase</button>
         </div>
@@ -734,21 +735,90 @@
                     <div class="form-group full-width">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <label style="margin-bottom: 0;">نص المقال والفقرات *</label>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <label class="switch" style="width: 35px; height: 20px; margin-bottom:0;">
-                                    <input type="checkbox" id="auto-format-toggle" checked>
-                                    <span class="slider" style="border-radius: 20px;"></span>
-                                </label>
-                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">تنسيق تلقائي للمقال (عناوين، فقرات، قوائم)</span>
-                            </div>
+                            <span style="font-size: 11px; color: var(--accent-orange); font-weight: 700;">✨ التنسيق تلقائي وإجباري (عناوين #، فقرات، وقوائم)</span>
                         </div>
-                        <textarea id="post-content" rows="12" placeholder="اكتب نص المقال كاملاً هنا. إذا كان التنسيق التلقائي مفعلاً، يمكنك ببساطة كتابة عناوينك مسبوقة بـ # أو أرقام، والفقرات مفصولة بسطر فارغ وسيتولى النظام تنسيقها بأناقة..."></textarea>
+                        <textarea id="post-content" rows="12" placeholder="اكتب نص المقال كاملاً هنا. اكتب عناوينك مسبوقة بـ # أو أرقام، والفقرات مفصولة بسطر فارغ وسيقوم النظام بتنسيقها تلقائياً بأناقة..."></textarea>
                     </div>
                 </div>
 
                 <div style="margin-top: 20px; display: flex; gap: 15px;">
                     <button class="btn" id="publish-btn" onclick="publishPost()">نشر المقال الآن</button>
                     <button class="btn btn-secondary" onclick="openLivePreview()">معاينة حية للمقال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: Manage & Edit Posts -->
+        <div id="manage-posts-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>📝</span> إدارة وتعديل المقالات المنشورة
+                </div>
+                
+                <div id="manage-posts-loading" style="text-align: center; padding: 30px; color: var(--text-muted); display: none;">
+                    <div style="border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid var(--accent-orange); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                    <span>جاري تحميل المقالات...</span>
+                </div>
+
+                <div id="manage-posts-empty" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
+                    لا توجد مقالات منشورة حالياً في قاعدة البيانات.
+                </div>
+
+                <div id="manage-posts-list" style="overflow-x: auto;">
+                    <!-- Posts table will be dynamically injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Article Edit Modal -->
+        <div id="edit-post-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6, 15, 36, 0.95); backdrop-filter: blur(10px); z-index: 10001; display: none; overflow-y: auto; padding: 40px 20px;">
+            <div class="card" style="max-width: 800px; width: 100%; margin: 0 auto; background: var(--primary-light); color: var(--text-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color);">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <span style="font-size: 18px; font-weight: 800;">✏️ تعديل المقال وتحديثه</span>
+                    <button onclick="closeEditModal()" style="background: rgba(255, 255, 255, 0.05); border: none; color: var(--text-light); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center;">×</button>
+                </div>
+                
+                <div class="form-grid" style="margin-top: 20px;">
+                    <input type="hidden" id="edit-post-id">
+                    <div class="form-group full-width">
+                        <label for="edit-post-title">عنوان المقال *</label>
+                        <input type="text" id="edit-post-title" required placeholder="عنوان المقال...">
+                    </div>
+                    <div class="form-group">
+                           <label for="edit-post-category">تصنيف المقال *</label>
+                           <select id="edit-post-category" onchange="toggleEditCustomCategory()">
+                               <option value="السلامة المهنية">السلامة المهنية</option>
+                               <option value="أنظمة مكافحة الحريق">أنظمة مكافحة الحريق</option>
+                               <option value="الفحص والاختبار (ITM)">الفحص والاختبار (ITM)</option>
+                               <option value="custom">تصنيف مخصص...</option>
+                           </select>
+                           <input type="text" id="edit-post-custom-category" placeholder="اكتب التصنيف المخصص هنا..." style="margin-top: 10px; display: none;">
+                       </div>
+                       <div class="form-group">
+                           <label for="edit-post-readtime">مدة القراءة المقدرة (دقائق)</label>
+                           <input type="text" id="edit-post-readtime" placeholder="اتركها فارغة للحساب التلقائي">
+                       </div>
+                       <div class="form-group full-width">
+                           <label for="edit-post-image-url">صورة الغلاف (رابط مباشر أو قم برفع ملف)</label>
+                           <input type="text" id="edit-post-image-url" placeholder="رابط الصورة...">
+                           <div class="image-upload-wrapper" onclick="document.getElementById('edit-post-image-file').click()" style="margin-top: 10px;">
+                               <p style="font-size: 13px; color: var(--text-muted);">انقر لرفع صورة غلاف جديدة للمقال</p>
+                               <input type="file" id="edit-post-image-file" style="display: none;" accept="image/*" onchange="previewEditUploadedImage(event)">
+                               <img id="edit-image-preview" class="image-upload-preview" src="#" alt="معاينة الصورة">
+                           </div>
+                       </div>
+                       <div class="form-group full-width">
+                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                               <label style="margin-bottom: 0;">نص المقال والفقرات *</label>
+                               <span style="font-size: 11px; color: var(--accent-orange); font-weight: 700;">✨ التنسيق تلقائي وإجباري (عناوين #، فقرات، وقوائم)</span>
+                           </div>
+                           <textarea id="edit-post-content" rows="12" placeholder="محتوى المقال النصي..."></textarea>
+                       </div>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <button class="btn" id="save-edit-btn" onclick="saveEditedPost()">حفظ التعديلات</button>
+                    <button class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
                 </div>
             </div>
         </div>
@@ -879,6 +949,7 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
         const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
 
         let encodedImage = '';
+        let editEncodedImage = '';
 
         // Session validation
         window.onload = function() {
@@ -1145,6 +1216,12 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
         function autoFormat(text) {
             if (!text.trim()) return '';
             
+            // If the text already looks like HTML, do not format it again to prevent double formatting
+            const trimmedText = text.trim();
+            if (trimmedText.startsWith('<') && (trimmedText.includes('</p>') || trimmedText.includes('</h3>') || trimmedText.includes('</h4>') || trimmedText.includes('</ul>'))) {
+                return text;
+            }
+            
             const lines = text.split('\n');
             let result = '';
             let inList = false;
@@ -1207,8 +1284,7 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
         // Get final content (formatted or raw)
         function getPostContent() {
             const rawContent = document.getElementById('post-content').value;
-            const useAutoFormat = document.getElementById('auto-format-toggle').checked;
-            return useAutoFormat ? autoFormat(rawContent) : rawContent;
+            return autoFormat(rawContent);
         }
 
         function getSelectedCategory() {
@@ -1401,6 +1477,234 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
             } catch (err) {
                 console.error(err);
                 showAlert('حدث خطأ أثناء محاولة حذف الرسالة.', true);
+            }
+        }
+
+        // ====== MANAGE & EDIT POSTS ======
+        async function loadManagePosts() {
+            const loading = document.getElementById('manage-posts-loading');
+            const empty = document.getElementById('manage-posts-empty');
+            const list = document.getElementById('manage-posts-list');
+            if (!list) return;
+
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            list.innerHTML = '';
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?order=created_at.desc`, {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch posts');
+                const posts = await response.json();
+                loading.style.display = 'none';
+
+                if (posts.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px;">' +
+                    '<thead>' +
+                        '<tr style="border-bottom: 2px solid var(--border-color); text-align: right; font-size: 13px; color: var(--text-muted);">' +
+                            '<th style="padding: 12px 10px;">الصورة</th>' +
+                            '<th style="padding: 12px 10px;">عنوان المقال</th>' +
+                            '<th style="padding: 12px 10px;">التصنيف</th>' +
+                            '<th style="padding: 12px 10px;">تاريخ النشر</th>' +
+                            '<th style="padding: 12px 10px; text-align: center;">الإجراءات</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+
+                posts.forEach(post => {
+                    const formattedDate = new Date(post.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const category = post.categories ? post.categories.join(', ') : 'عام';
+                    const imgSrc = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+
+                    html += '<tr style="border-bottom: 1px solid var(--border-color); font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'none\'">' +
+                        '<td style="padding: 12px 10px;"><img src="' + imgSrc + '" style="width: 50px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);"></td>' +
+                        '<td style="padding: 12px 10px; font-weight: 700; color: var(--text-light);">' + post.title + '</td>' +
+                        '<td style="padding: 12px 10px; color: var(--text-muted);">' + category + '</td>' +
+                        '<td style="padding: 12px 10px; color: var(--text-muted);">' + formattedDate + '</td>' +
+                        '<td style="padding: 12px 10px; text-align: center; display: flex; justify-content: center; gap: 10px; align-items: center; min-height: 59px;">' +
+                            '<button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="openEditPost(' + post.id + ')">✏️ تعديل</button>' +
+                            '<button class="btn" style="padding: 6px 12px; font-size: 12px; background-color: var(--error);" onclick="deletePost(' + post.id + ')">🗑️ حذف</button>' +
+                        '</td>' +
+                    '</tr>';
+                });
+
+                html += '</tbody></table>';
+                list.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+                showAlert('حدث خطأ أثناء تحميل المقالات المنشورة.', true);
+            }
+        }
+
+        async function openEditPost(postId) {
+            const editModal = document.getElementById('edit-post-modal');
+            if (!editModal) return;
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch post');
+                const posts = await response.json();
+                if (posts.length === 0) return;
+                
+                const post = posts[0];
+                document.getElementById('edit-post-id').value = post.id;
+                document.getElementById('edit-post-title').value = post.title;
+                
+                const catSelect = document.getElementById('edit-post-category');
+                const customCatInput = document.getElementById('edit-post-custom-category');
+                const category = post.categories && post.categories.length > 0 ? post.categories[0] : 'عام';
+                
+                if (['السلامة المهنية', 'أنظمة مكافحة الحريق', 'الفحص والاختبار (ITM)'].includes(category)) {
+                    catSelect.value = category;
+                    customCatInput.style.display = 'none';
+                    customCatInput.value = '';
+                } else {
+                    catSelect.value = 'custom';
+                    customCatInput.style.display = 'block';
+                    customCatInput.value = category;
+                }
+
+                document.getElementById('edit-post-image-url').value = post.image || '';
+                document.getElementById('edit-post-image-file').value = '';
+                document.getElementById('edit-image-preview').style.display = 'none';
+                editEncodedImage = '';
+
+                document.getElementById('edit-post-content').value = post.content || '';
+                
+                editModal.style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء تحميل بيانات المقال للتعديل.', true);
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-post-modal').style.display = 'none';
+        }
+
+        function toggleEditCustomCategory() {
+            const select = document.getElementById('edit-post-category');
+            const customInput = document.getElementById('edit-post-custom-category');
+            if (select.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+            }
+        }
+
+        function previewEditUploadedImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                editEncodedImage = e.target.result;
+                const previewImg = document.getElementById('edit-image-preview');
+                previewImg.src = editEncodedImage;
+                previewImg.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function getEditSelectedCategory() {
+            const selectVal = document.getElementById('edit-post-category').value;
+            if (selectVal === 'custom') {
+                return document.getElementById('edit-post-custom-category').value.trim() || 'عام';
+            }
+            return selectVal;
+        }
+
+        async function saveEditedPost() {
+            const postId = document.getElementById('edit-post-id').value;
+            const title = document.getElementById('edit-post-title').value.trim();
+            const rawContent = document.getElementById('edit-post-content').value.trim();
+            const category = getEditSelectedCategory();
+            const imageUrl = document.getElementById('edit-post-image-url').value.trim() || editEncodedImage || 'https://files.catbox.moe/ru6efb.jpeg';
+
+            if (!title) {
+                showAlert('يرجى إدخال عنوان المقال.', true);
+                return;
+            }
+            if (!rawContent) {
+                showAlert('يرجى إدخال محتوى المقال.', true);
+                return;
+            }
+
+            const formattedContent = autoFormat(rawContent);
+
+            const saveBtn = document.getElementById('save-edit-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'جاري حفظ التعديلات...';
+
+            const payload = {
+                title: title,
+                content: formattedContent,
+                categories: [category],
+                image: imageUrl
+            };
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Database write error');
+
+                showAlert('🎉 تم حفظ وتحديث التعديلات بنجاح!');
+                closeEditModal();
+                loadManagePosts();
+                loadDashboardStats();
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء حفظ التعديلات.', true);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'حفظ التعديلات';
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('هل أنت متأكد من رغبتك في حذف هذا المقال نهائياً؟ لا يمكن استرجاع المقال بعد حذفه.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete post');
+
+                showAlert('🗑️ تم حذف المقال بنجاح.');
+                loadManagePosts();
+                loadDashboardStats();
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء محاولة حذف المقال.', true);
             }
         }
     </script>
