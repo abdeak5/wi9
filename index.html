@@ -2948,6 +2948,52 @@
             align-items: center;
         }
 
+        /* Comments Section Styling */
+        .comments-section-wrapper {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border-top: 4px solid var(--accent-orange);
+            direction: rtl;
+            text-align: right;
+        }
+
+        .comments-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .comments-header svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--primary-dark);
+        }
+
+        .comments-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .comments-intro {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .comments-container {
+            min-height: 150px;
+            position: relative;
+        }
+
         /* ==================== HERO SLIDESHOW ==================== */
         .hero-slideshow-track {
             position: absolute;
@@ -3407,9 +3453,33 @@
                             '</span>' +
                         '</div>' +
                     '</header>' +
-                    '<article class="single-post-content">' + post.content + '</article>';
+                    '<article class="single-post-content">' + post.content + '</article>' +
+                    '<div class="comments-section-wrapper">' +
+                        '<div class="comments-header">' +
+                            '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>' +
+                            '<h3>التعليقات والمناقشات</h3>' +
+                        '</div>' +
+                        '<p class="comments-intro">' +
+                            'شاركنا برأيك أو استفسارك حول هذه التدوينة. يتم إدارة التعليقات وتخزينها بشكل آمن ومفتوح عبر مستودع المشروع في GitHub (يتطلب إرسال التعليق تسجيل دخولك بحساب GitHub الخاص بك).' +
+                        '</p>' +
+                        '<div id="comments-container" class="comments-container"></div>' +
+                    '</div>';
 
                 singlePostView.style.display = 'block';
+
+                // Load Utterances dynamically for this post
+                const commentsContainer = document.getElementById('comments-container');
+                if (commentsContainer) {
+                    commentsContainer.innerHTML = '';
+                    const utterancesScript = document.createElement('script');
+                    utterancesScript.src = 'https://utteranc.es/client.js';
+                    utterancesScript.setAttribute('repo', 'abdeak5/wi9');
+                    utterancesScript.setAttribute('issue-term', 'post-' + post.id);
+                    utterancesScript.setAttribute('theme', 'github-light');
+                    utterancesScript.setAttribute('crossorigin', 'anonymous');
+                    utterancesScript.async = true;
+                    commentsContainer.appendChild(utterancesScript);
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Trigger scroll event to calculate progress immediately
                 window.dispatchEvent(new Event('scroll'));
