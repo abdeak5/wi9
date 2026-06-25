@@ -2335,26 +2335,85 @@
             <div class="contact-grid">
                 <div class="contact-form-side">
                     <p class="section-intro">يسعدنا دائماً استقبال استفساراتكم. يرجى ملء النموذج أدناه وسيقوم فريقنا بالرد عليكم خلال 24 ساعة.</p>
-                    <form class="modal-contact-form" onsubmit="event.preventDefault(); alert('شكراً لتواصلك معنا! لقد تم استلام رسالتك وسيتواصل معك مهندسو السلامة لدينا في أقرب وقت.'); this.reset();">
+                    <form class="modal-contact-form" id="contact-form-element">
                         <div class="form-group">
-                            <label>الاسم الكريم</label>
-                            <input type="text" required placeholder="أدخل اسمك الكامل">
+                            <label for="contact-name">الاسم الكريم</label>
+                            <input type="text" id="contact-name" required placeholder="أدخل اسمك الكامل">
                         </div>
                         <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" required placeholder="name@domain.com">
+                            <label for="contact-email">البريد الإلكتروني</label>
+                            <input type="email" id="contact-email" required placeholder="name@domain.com">
                         </div>
                         <div class="form-group">
-                            <label>الموضوع</label>
-                            <input type="text" required placeholder="ما هو موضوع استفسارك؟">
+                            <label for="contact-subject">الموضوع</label>
+                            <input type="text" id="contact-subject" required placeholder="ما هو موضوع استفسارك؟">
                         </div>
                         <div class="form-group">
-                            <label>نص الرسالة</label>
-                            <textarea rows="4" required placeholder="اكتب تفاصيل رسالتك أو استفسارك هنا..."></textarea>
+                            <label for="contact-message">نص الرسالة</label>
+                            <textarea id="contact-message" rows="4" required placeholder="اكتب تفاصيل رسالتك أو استفسارك هنا..."></textarea>
                         </div>
-                        <button type="submit" class="form-submit-btn">إرسال الرسالة</button>
+                        <button type="submit" id="contact-submit-btn" class="form-submit-btn">إرسال الرسالة</button>
+                        <div id="contact-status-msg" style="margin-top: 15px; font-size: 13px; display: none; padding: 12px; border-radius: 6px; line-height: 1.6;"></div>
                     </form>
                 </div>
+
+                <script>
+                    document.getElementById('contact-form-element').onsubmit = async function(e) {
+                        e.preventDefault();
+                        const btn = document.getElementById('contact-submit-btn');
+                        const statusMsg = document.getElementById('contact-status-msg');
+                        
+                        btn.disabled = true;
+                        btn.innerText = 'جاري الإرسال...';
+                        statusMsg.style.display = 'none';
+
+                        const name = document.getElementById('contact-name').value.trim();
+                        const email = document.getElementById('contact-email').value.trim();
+                        const subject = document.getElementById('contact-subject').value.trim();
+                        const message = document.getElementById('contact-message').value.trim();
+
+                        const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+                        const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+                        try {
+                            const response = await fetch(supabaseUrl + '/rest/v1/messages', {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=representation'
+                                },
+                                body: JSON.stringify({
+                                    name: name,
+                                    email: email,
+                                    subject: subject,
+                                    message: message
+                                })
+                            });
+
+                            if (!response.ok) throw new Error('Database error');
+
+                            statusMsg.innerText = 'تم إرسال رسالتك بنجاح! شكرًا لتواصلك معنا.';
+                            statusMsg.style.backgroundColor = 'rgba(46, 196, 182, 0.1)';
+                            statusMsg.style.border = '1px solid #2ec4b6';
+                            statusMsg.style.color = '#d1f7f4';
+                            statusMsg.style.display = 'block';
+
+                            document.getElementById('contact-form-element').reset();
+                        } catch(err) {
+                            console.error(err);
+                            statusMsg.innerText = 'حدث خطأ أثناء إرسال الرسالة. يرجى التأكد من إعداد جدول "messages" في Supabase وتفعيل الصلاحيات.';
+                            statusMsg.style.backgroundColor = 'rgba(231, 29, 54, 0.1)';
+                            statusMsg.style.border = '1px solid #e71d36';
+                            statusMsg.style.color = '#ffd6db';
+                            statusMsg.style.display = 'block';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerText = 'إرسال الرسالة';
+                        }
+                    };
+                </script>
                 <div class="contact-info-card">
                     <h4 style="color: var(--accent-orange); font-size: 16px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 8px;">معلومات الاتصال المباشر</h4>
                     <div class="contact-info-item">
