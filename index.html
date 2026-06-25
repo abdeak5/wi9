@@ -4255,23 +4255,67 @@
                                 return;
                             }
                             
-                            let html = '';
+                            // Group comments: find roots and replies
+                            const roots = [];
+                            const replies = {}; // parent_id -> array of replies
+                            
                             comments.forEach(c => {
-                                const initial = c.nickname.trim().charAt(0).toUpperCase();
-                                const avatarColor = getAvatarColor(c.nickname);
+                                if (!c.parent_id) {
+                                    roots.push(c);
+                                } else {
+                                    if (!replies[c.parent_id]) {
+                                        replies[c.parent_id] = [];
+                                    }
+                                    replies[c.parent_id].push(c);
+                                }
+                            });
+                            
+                            // Fallback for orphaned replies: treat comments with parent_id whose parent is not in list as roots
+                            const commentIds = comments.map(c => c.id);
+                            comments.forEach(c => {
+                                if (c.parent_id && !commentIds.includes(c.parent_id) && !roots.includes(c)) {
+                                    roots.push(c);
+                                }
+                            });
+                            
+                            let html = '';
+                            
+                            function renderCommentNode(c, isReply = false) {
+                                const initial = c.is_admin ? '🛠️' : c.nickname.trim().charAt(0).toUpperCase();
+                                const avatarColor = c.is_admin ? '#f39c12' : getAvatarColor(c.nickname);
                                 const relativeTime = formatRelativeTime(c.created_at);
                                 const safeContent = c.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                                 
-                                html += '<div class="comment-item">' +
-                                    '<div class="comment-avatar" style="background-color: ' + avatarColor + ';">' + initial + '</div>' +
+                                const adminBadge = c.is_admin ? '<span class="admin-badge" style="background: #f39c12; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-right: 8px; font-weight: bold;">الإدارة 🛠️</span>' : '';
+                                const adminClass = c.is_admin ? ' comment-admin' : '';
+                                
+                                const replyStyle = isReply ? 'margin-right: 45px; border-right: 2px solid rgba(243, 156, 18, 0.25); padding-right: 15px; margin-top: 10px; background: rgba(255,255,255,0.01);' : '';
+                                const adminBorder = c.is_admin ? 'border: 1px solid rgba(243, 156, 18, 0.3); background: rgba(243, 156, 18, 0.02);' : '';
+                                
+                                let nodeHtml = '<div class="comment-item' + adminClass + '" style="' + replyStyle + adminBorder + ' border-radius: 8px; padding: 12px; margin-bottom: 12px;">' +
+                                    '<div class="comment-avatar" style="background-color: ' + avatarColor + '; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff;">' + initial + '</div>' +
                                     '<div class="comment-content-area">' +
-                                        '<div class="comment-meta">' +
-                                            '<span class="comment-author">' + c.nickname + '</span>' +
-                                            '<span class="comment-date">' + relativeTime + '</span>' +
+                                        '<div class="comment-meta" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">' +
+                                            '<span class="comment-author" style="font-weight: 700;">' + c.nickname + '</span>' + 
+                                            adminBadge +
+                                            '<span class="comment-date" style="font-size: 12px; color: var(--text-muted);">' + relativeTime + '</span>' +
                                         '</div>' +
-                                        '<p class="comment-text">' + safeContent + '</p>' +
+                                        '<p class="comment-text" style="margin-top: 6px; line-height: 1.6; font-size: 14.5px;">' + safeContent + '</p>' +
                                     '</div>' +
                                 '</div>';
+                                
+                                // Render children replies recursively
+                                if (replies[c.id]) {
+                                    replies[c.id].forEach(child => {
+                                        nodeHtml += renderCommentNode(child, true);
+                                    });
+                                }
+                                
+                                return nodeHtml;
+                            }
+                            
+                            roots.forEach(root => {
+                                html += renderCommentNode(root, false);
                             });
                             
                             commentsList.innerHTML = html;

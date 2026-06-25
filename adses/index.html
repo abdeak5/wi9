@@ -600,6 +600,7 @@
             <button class="tab-btn active" onclick="switchTab(event, 'ads-tab')">إدارة إعلانات AdSense</button>
             <button class="tab-btn" onclick="switchTab(event, 'post-tab')">نشر تدوينة جديدة</button>
             <button class="tab-btn" onclick="switchTab(event, 'manage-posts-tab'); loadManagePosts()">إدارة المقالات</button>
+            <button class="tab-btn" onclick="switchTab(event, 'comments-tab'); loadCommentsManager()">💬 إدارة التعليقات</button>
             <button class="tab-btn" onclick="switchTab(event, 'inbox-tab'); loadInboxMessages()">الرسائل الواردة</button>
             <button class="tab-btn" onclick="switchTab(event, 'supabase-tab')">تهيئة قاعدة البيانات Supabase</button>
             <button class="tab-btn" onclick="switchTab(event, 'network-tab'); checkNetworkStatus()">حالة الشبكة</button>
@@ -825,6 +826,38 @@
             </div>
         </div>
 
+        <!-- Comment Reply Modal -->
+        <div id="reply-comment-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6, 15, 36, 0.95); backdrop-filter: blur(10px); z-index: 10001; display: none; overflow-y: auto; padding: 40px 20px;">
+            <div class="card" style="max-width: 600px; width: 100%; margin: 0 auto; background: var(--primary-light); color: var(--text-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-color);">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <span style="font-size: 18px; font-weight: 800;">✍️ رد الإدارة على التعليق</span>
+                    <button onclick="closeReplyCommentModal()" style="background: rgba(255, 255, 255, 0.05); border: none; color: var(--text-light); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center;">×</button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <input type="hidden" id="reply-parent-id">
+                    <input type="hidden" id="reply-post-id">
+                    
+                    <div class="form-group full-width" style="margin-bottom: 20px;">
+                        <label style="color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">التعليق الأصلي:</label>
+                        <div id="reply-original-text" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; color: var(--text-light); word-break: break-word;">
+                            <!-- Original comment text will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="reply-content">نص رد الإدارة الرسمي *</label>
+                        <textarea id="reply-content" rows="6" placeholder="اكتب رد الإدارة هنا..." required style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; color: #fff;"></textarea>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <button class="btn" id="send-reply-btn" onclick="submitAdminReply()">إرسال الرد</button>
+                    <button class="btn btn-secondary" onclick="closeReplyCommentModal()">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB 3: Received Messages (Inbox) -->
         <div id="inbox-tab" class="tab-content">
             <div class="card">
@@ -843,6 +876,29 @@
 
                 <div id="inbox-list" style="display: grid; gap: 20px;">
                     <!-- Messages will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Comments Manager -->
+        <div id="comments-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>💬 إدارة التعليقات والمناقشات</span>
+                    <button class="btn" onclick="loadCommentsManager()" style="padding: 6px 12px; font-size: 12px;">🔄 تحديث التعليقات</button>
+                </div>
+                
+                <div id="comments-manager-loading" style="text-align: center; padding: 30px; color: var(--text-muted); display: none;">
+                    <div style="border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid var(--accent-orange); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                    <span>جاري تحميل التعليقات...</span>
+                </div>
+
+                <div id="comments-manager-empty" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
+                    لا توجد تعليقات منشورة حالياً في أي مقال.
+                </div>
+
+                <div id="comments-manager-list" class="table-responsive" style="overflow-x: auto;">
+                    <!-- Comments table will be injected here -->
                 </div>
             </div>
         </div>
@@ -924,7 +980,29 @@ CREATE TABLE IF NOT EXISTS messages (
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow anon read messages" ON messages FOR SELECT USING (true);
 CREATE POLICY "Allow anon insert messages" ON messages FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);</code></pre>
+CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);
+
+-- 4. جدول التعليقات والمناقشات comments
+CREATE TABLE IF NOT EXISTS comments (
+    id bigint PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    post_id text NOT NULL,
+    nickname text NOT NULL,
+    email text,
+    content text NOT NULL,
+    parent_id bigint REFERENCES comments(id) ON DELETE CASCADE,
+    is_admin boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- تفعيل سياسات الأمان RLS للتعليقات
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon select comments" ON comments FOR SELECT USING (true);
+CREATE POLICY "Allow anon insert comments" ON comments FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anon delete comments" ON comments FOR DELETE USING (true);
+
+-- أوامر الترقية للجداول القائمة بالفعل (إذا كان الجدول منشأً مسبقاً):
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS parent_id bigint REFERENCES comments(id) ON DELETE CASCADE;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;</code></pre>
                 
                 <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.querySelector('pre code').innerText); alert('تم نسخ كود SQL بنجاح!')">
                     نسخ كود SQL بالكامل
@@ -1592,6 +1670,205 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
             } catch (err) {
                 console.error(err);
                 showAlert('حدث خطأ أثناء محاولة حذف الرسالة.', true);
+            }
+        }
+
+        // ====== COMMENTS MANAGEMENT ======
+        async function loadCommentsManager() {
+            const loading = document.getElementById('comments-manager-loading');
+            const empty = document.getElementById('comments-manager-empty');
+            const listWrapper = document.getElementById('comments-manager-list');
+            
+            if (!loading || !empty || !listWrapper) return;
+            
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            listWrapper.innerHTML = '';
+            
+            try {
+                // 1. Fetch posts map
+                const postsRes = await fetch(`${supabaseUrl}/rest/v1/posts`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                const posts = postsRes.ok ? await postsRes.json() : [];
+                const postsMap = {};
+                posts.forEach(p => {
+                    postsMap['post-' + p.id] = p.title;
+                    postsMap['sb-' + p.id] = p.title;
+                });
+                
+                // 2. Fetch comments
+                const commentsRes = await fetch(`${supabaseUrl}/rest/v1/comments?order=created_at.desc`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                if (!commentsRes.ok) throw new Error('Failed to fetch comments');
+                const comments = await commentsRes.json();
+                
+                loading.style.display = 'none';
+                
+                if (comments.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+                
+                // Map comments for easy reference
+                const commentsMap = {};
+                comments.forEach(c => {
+                    commentsMap[c.id] = c;
+                });
+                
+                let html = '<table style="width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 800px;">' +
+                    '<thead>' +
+                        '<tr style="border-bottom: 2px solid var(--border-color); text-align: right; font-size: 13px; color: var(--text-muted);">' +
+                            '<th style="padding: 12px 10px;">الكاتب</th>' +
+                            '<th style="padding: 12px 10px;">التعليق</th>' +
+                            '<th style="padding: 12px 10px;">في المقال</th>' +
+                            '<th style="padding: 12px 10px;">التاريخ</th>' +
+                            '<th style="padding: 12px 10px; text-align: center;">الإجراءات</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+                
+                comments.forEach(c => {
+                    const formattedDate = new Date(c.created_at).toLocaleDateString('ar-EG', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const postTitle = postsMap[c.post_id] || 'مقال مجهول (معرف: ' + c.post_id + ')';
+                    const emailBadge = c.email ? `<br><span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${c.email}</span>` : '';
+                    
+                    const nameStyle = c.is_admin ? 'color: var(--accent-orange); font-weight: 800;' : 'color: var(--text-light); font-weight: 700;';
+                    const adminBadge = c.is_admin ? ' <span style="background: rgba(243,156,18,0.15); color: var(--accent-orange); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">الإدارة 🛠️</span>' : '';
+                    
+                    let replyInfo = '';
+                    if (c.parent_id && commentsMap[c.parent_id]) {
+                        const parent = commentsMap[c.parent_id];
+                        replyInfo = `<div style="background: rgba(255,255,255,0.03); border-right: 3px solid var(--border-color); padding: 5px 10px; margin-bottom: 5px; font-size: 12px; color: var(--text-muted); border-radius: 4px;">` +
+                            `رداً على <strong>${parent.nickname}</strong>: "${parent.content.substring(0, 40)}${parent.content.length > 40 ? '...' : ''}"` +
+                            `</div>`;
+                    }
+                    
+                    html += '<tr style="border-bottom: 1px solid var(--border-color); font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'none\'">' +
+                        '<td style="padding: 12px 10px; vertical-align: top;">' +
+                            '<span style="' + nameStyle + '">' + c.nickname + '</span>' + adminBadge + emailBadge +
+                        '</td>' +
+                        '<td style="padding: 12px 10px; vertical-align: top; max-width: 350px; word-wrap: break-word; white-space: normal;">' +
+                            replyInfo + 
+                            '<div style="color: var(--text-muted); line-height: 1.6;">' + c.content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+                        '</td>' +
+                        '<td style="padding: 12px 10px; vertical-align: top; color: var(--text-light); font-size: 13px;">' + postTitle + '</td>' +
+                        '<td style="padding: 12px 10px; vertical-align: top; color: var(--text-muted); font-size: 12px;">' + formattedDate + '</td>' +
+                        '<td style="padding: 12px 10px; vertical-align: top; text-align: center; display: flex; justify-content: center; gap: 8px; align-items: center; min-height: 59px; flex-wrap: wrap;">' +
+                            (c.is_admin ? '' : '<button class="btn" style="padding: 6px 10px; font-size: 11px; background-color: #2ec4b6;" onclick="openReplyCommentModal(' + c.id + ', \'' + c.post_id + '\')">✍️ رد الإدارة</button>') +
+                            '<button class="btn" style="padding: 6px 10px; font-size: 11px; background-color: var(--error);" onclick="deleteComment(' + c.id + ')">🗑️ حذف</button>' +
+                        '</td>' +
+                    '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                listWrapper.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+                showAlert('حدث خطأ أثناء تحميل التعليقات.', true);
+            }
+        }
+
+        async function deleteComment(commentId) {
+            if (!confirm('هل أنت متأكد من رغبتك في حذف هذا التعليق؟ (سيتم حذف كافة الردود التابعة له تلقائياً)')) return;
+            
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/comments?id=eq.${commentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Delete error');
+
+                showAlert('تم حذف التعليق بنجاح.');
+                loadCommentsManager();
+                loadDashboardStats();
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء محاولة حذف التعليق.', true);
+            }
+        }
+
+        function openReplyCommentModal(commentId, postId) {
+            const modal = document.getElementById('reply-comment-modal');
+            if (!modal) return;
+            
+            document.getElementById('reply-parent-id').value = commentId;
+            document.getElementById('reply-post-id').value = postId;
+            document.getElementById('reply-content').value = '';
+            
+            const btn = event.target;
+            const row = btn.closest('tr');
+            const commentTextDiv = row.querySelector('td:nth-child(2) div:last-child');
+            const authorSpan = row.querySelector('td:first-child span:first-child');
+            
+            document.getElementById('reply-original-text').innerHTML = `<strong>${authorSpan.textContent}</strong>: <br>${commentTextDiv.innerHTML}`;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeReplyCommentModal() {
+            document.getElementById('reply-comment-modal').style.display = 'none';
+        }
+
+        async function submitAdminReply() {
+            const parentId = document.getElementById('reply-parent-id').value;
+            const postId = document.getElementById('reply-post-id').value;
+            const content = document.getElementById('reply-content').value.trim();
+            
+            if (!content) {
+                showAlert('يرجى كتابة نص الرد.', true);
+                return;
+            }
+            
+            const btn = document.getElementById('send-reply-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الإرسال...';
+            
+            const payload = {
+                post_id: postId,
+                parent_id: parseInt(parentId),
+                nickname: 'وقاية برو (الإدارة)',
+                email: 'wiqayahpro@gmail.com',
+                content: content,
+                is_admin: true
+            };
+            
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error('Database write error');
+                
+                showAlert('🎉 تم إرسال ونشر رد الإدارة بنجاح!');
+                closeReplyCommentModal();
+                loadCommentsManager();
+                loadDashboardStats();
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء محاولة إرسال الرد.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'إرسال الرد';
             }
         }
 
