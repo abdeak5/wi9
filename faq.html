@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دليل معايير NFPA | وقاية برو</title>
+    <title>من نحن | وقاية برو</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://files.catbox.moe/ub1za9.png" />
     <link rel="shortcut icon" type="image/png" href="https://files.catbox.moe/ub1za9.png" />
@@ -2132,6 +2132,189 @@
                 bottom: 15px;
             }
         }
+
+        /* FAQ Section Styling */
+        .faq-container-wrapper {
+            margin-top: 20px;
+            direction: rtl;
+        }
+        
+        .faq-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .faq-tab {
+            padding: 10px 24px;
+            background: var(--white);
+            border: 1px solid rgba(13, 30, 61, 0.08);
+            color: var(--primary-dark);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .faq-tab:hover, .faq-tab.active {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .faq-tab.active {
+            box-shadow: 0 5px 15px rgba(13, 30, 61, 0.15);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            perspective: 1000px;
+        }
+
+        .faq-card {
+            height: 250px;
+            cursor: pointer;
+            position: relative;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .faq-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .faq-card.flipped .faq-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .faq-card-front, .faq-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .faq-card-front {
+            background-color: var(--white);
+            color: var(--primary-dark);
+        }
+
+        .faq-card:hover .faq-card-front {
+            border-color: var(--accent-orange);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .faq-card-icon {
+            font-size: 38px;
+            margin-bottom: 5px;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .faq-card:hover .faq-card-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .faq-card-front h3 {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin: 0;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+        }
+
+        .faq-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 8px;
+            width: 100%;
+        }
+
+        .faq-card-back {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            transform: rotateY(180deg);
+            border-color: var(--accent-orange);
+            background-image: radial-gradient(circle at 10% 20%, rgba(243, 156, 18, 0.04) 0%, transparent 90%);
+        }
+
+        .faq-card-back h3 {
+            font-size: 13px;
+            color: var(--accent-orange);
+            font-weight: 800;
+            margin: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 6px;
+            width: 100%;
+        }
+
+        .faq-card-back p {
+            font-size: 13px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .faq-card-back .faq-hint {
+            color: var(--accent-orange);
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .faq-grid {
+                grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+                gap: 15px;
+            }
+            .faq-card {
+                height: 230px;
+            }
+            .faq-card-front, .faq-card-back {
+                padding: 15px;
+            }
+            .faq-card-front h3 {
+                font-size: 13px;
+            }
+            .faq-card-back p {
+                font-size: 12px;
+            }
+            .faq-tabs {
+                gap: 8px;
+                margin-bottom: 25px;
+            }
+            .faq-tab {
+                padding: 8px 18px;
+                font-size: 12px;
+            }
+        }
 </style>
 </head>
 <body>
@@ -2220,11 +2403,11 @@
     
     <section class="page-header-banner">
         <div class="container">
-            <h1 class="page-header-title">دليل معايير NFPA</h1>
+            <h1 class="page-header-title">الأسئلة الشائعة</h1>
             <nav class="breadcrumbs">
                 <a href="index.html">الرئيسية</a>
                 <span class="breadcrumb-sep">/</span>
-                <span class="breadcrumb-current">دليل معايير NFPA</span>
+                <span class="breadcrumb-current">الأسئلة الشائعة</span>
             </nav>
         </div>
     </section>
@@ -2238,70 +2421,196 @@
     </section>
 
     <main class="page-content">
-        <div class="container" style="max-width: 1000px;">
+        <div class="container" >
             <div class="page-content-card">
                 
-            <p class="section-intro">الجمعية الوطنية الأمريكية للحماية من الحرائق (NFPA) تضع معايير معتمدة عالمياً لحماية الأرواح والممتلكات. نستعرض أدناه الأكواد الرئيسية المشروحة بالمنصة:</p>
             
-            <div class="nfpa-table-wrapper">
-                <table class="nfpa-table">
-                    <thead>
-                        <tr>
-                            <th>رمز الكود</th>
-                            <th>اسم المعيار الرسمي</th>
-                            <th>المجال والتطبيق الرئيسية</th>
-                            <th>التفاصيل</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="badge">NFPA 10</span></td>
-                            <td>طفايات الحريق المحمولة</td>
-                            <td>اشتراطات اختيار وتوزيع وفحص طفايات الحريق في المنشآت.</td>
-                            <td><span class="nfpa-detail-trigger">عرض التفاصيل</span></td>
-                        </tr>
-                        <tr class="nfpa-row-detail">
-                            <td colspan="4">
-                                <strong>متطلبات NFPA 10:</strong> يفرض الكود فحص طفايات الحريق المحمولة بشكل بصري شهرياً، وصيانتها سنوياً من قبل شركة سلامة معتمدة، مع الالتزام بارتفاع تركيب محدد للطفايات حسب الوزن (لا يزيد عن 1.5 متر للطفايات التي يقل وزنها عن 18 كجم).
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><span class="badge">NFPA 13</span></td>
-                            <td>أنظمة الرشاشات المائية الآلية</td>
-                            <td>التصميم الهندسي والحسابات الهيدروليكية لشبكات الرش الآلي.</td>
-                            <td><span class="nfpa-detail-trigger">عرض التفاصيل</span></td>
-                        </tr>
-                        <tr class="nfpa-row-detail">
-                            <td colspan="4">
-                                <strong>متطلبات NFPA 13:</strong> يحدد الكود مساحات التغطية لكل رشاش ونوع الأنبوب ودرجة الحرارة المطلوبة لفتح رأس الرشاش، بالإضافة إلى متطلبات غرف مضخات الحريق وخزان المياه المخصص لمكافحة الحرائق.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><span class="badge">NFPA 25</span></td>
-                            <td>فحص واختبار وصيانة أنظمة المياه (ITM)</td>
-                            <td>معايير الصيانة الوقائية والاختبار الدوري لمعدات الحريق المائية.</td>
-                            <td><span class="nfpa-detail-trigger">عرض التفاصيل</span></td>
-                        </tr>
-                        <tr class="nfpa-row-detail">
-                            <td colspan="4">
-                                <strong>متطلبات NFPA 25:</strong> يمثل ركيزة عملية لمسؤولي الصيانة، حيث يفصل جداول الاختبار الأسبوعية للمضخات، الشهرية والسنوية لصمامات عدم الرجوع والإنذار المائي لضمان تشغيل النظام عند الطوارئ.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><span class="badge">NFPA 72</span></td>
-                            <td>الكود الوطني لإنذار الحريق</td>
-                            <td>أنظمة كشف الدخان والحرارة وأجهزة الإنذار الصوتي والمرئي.</td>
-                            <td><span class="nfpa-detail-trigger">عرض التفاصيل</span></td>
-                        </tr>
-                        <tr class="nfpa-row-detail">
-                            <td colspan="4">
-                                <strong>متطلبات NFPA 72:</strong> يحدد مواقع كواشف الدخان والحرارة، ومستويات الصوت المطلوبة لصافرات الإنذار (مستوى ديسيبل أعلى من الضوضاء الخلفية بـ 15 ديسيبل)، ومستويات شدة الإضاءة لوامضات الإنذار (Strobe Lights).
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        
+                <div class="faq-container-wrapper">
+                    <p class="section-intro" style="text-align: center; margin-bottom: 30px;">
+                        هنا تجد الإجابات الوافية والمهنية على أبرز الأسئلة الشائعة المتعلقة بأنظمة مكافحة الحريق، متطلبات السلامة والصحة المهنية، وأعمال الفحص والاختبار (ITM) وفقاً للأكواد العالمية والمحلية.
+                    </p>
+                    
+                    <div class="faq-tabs">
+                        <button class="faq-tab active" data-category="all">الكل</button>
+                        <button class="faq-tab" data-category="fire">أنظمة مكافحة الحريق</button>
+                        <button class="faq-tab" data-category="safety">السلامة المهنية</button>
+                        <button class="faq-tab" data-category="itm">الفحص والاختبار (ITM)</button>
+                        <button class="faq-tab" data-category="general">ثقافة عامة</button>
+                    </div>
+                    
+                    <div class="faq-grid">
+                        <!-- Card 1 -->
+                        <div class="faq-card" data-category="fire">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🧯</div>
+                                    <h3>ما هي المدة الزمنية الموصى بها لفحص طفايات الحريق اليدوية؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>يجب فحص طفايات الحريق اليدوية بصرياً مرة كل شهر للتأكد من سلامتها ونظافتها، مع إجراء صيانة سنوية شاملة واختبار ضغط هيدروستاتيكي دوري طبقاً لمتطلبات الكود العالمي NFPA 10.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 2 -->
+                        <div class="faq-card" data-category="safety">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">👷</div>
+                                    <h3>ما هي معدات الوقاية الشخصية (PPE) الأساسية في المواقع الإنشائية؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>تشمل خوذة الرأس الصلبة لحمايتها من السقوط، أحذية السلامة المقاومة للثقب، نظارات حماية العين لحجب الشظايا، والسترات الفسفورية العاكسة للضوء لضمان وضوح رؤية العاملين.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 3 -->
+                        <div class="faq-card" data-category="itm">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🔍</div>
+                                    <h3>ماذا يعني مصطلح ITM وكيف يطبق على أنظمة الحماية من الحريق؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>يشير المصطلح إلى (Inspection, Testing, and Maintenance) - أي أعمال الفحص الدوري، الاختبار الفني، والصيانة الوقائية لشبكات الإطفاء ومضخات الحريق لضمان جاهزيتها الكاملة عند الطوارئ.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 4 -->
+                        <div class="faq-card" data-category="general">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🇸🇦</div>
+                                    <h3>هل كود البناء السعودي (SBC) يلزم بتركيب أنظمة رش آلي في جميع المباني التجارية؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>نعم، يفرض كود البناء السعودي تركيب أنظمة الرش الآلي المائية وكواشف الدخان والإنذار المبكر في الأنشطة التجارية والاستثمارية والصناعية بناءً على تصنيف الخطورة والإشغال والمساحة والارتفاع.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 5 -->
+                        <div class="faq-card" data-category="fire">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🚨</div>
+                                    <h3>كم مرة يجب اختبار كواشف الدخان المنزلية ومتى يجب استبدالها؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>يُنصح باختبار كواشف الدخان شهرياً بالضغط على زر الاختبار التجريبي، واستبدال بطارياتها سنوياً، مع استبدال الكاشف بالكامل كل 10 سنوات كحد أقصى لضمان دقة عمل المستشعرات.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 6 -->
+                        <div class="faq-card" data-category="safety">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">📋</div>
+                                    <h3>ما هي العناصر الأساسية التي يجب أن تتضمنها خطة إخلاء الطوارئ؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>يجب أن تتضمن خرائط إرشادية واضحة لمخارج الطوارئ، تحديد نقاط تجمع آمنة ومفتوحة بالخارج، قائمة بمسؤولي الإخلاء المدربين، وخطط دورية لتدريب العاملين (كل 6 أشهر).</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 7 -->
+                        <div class="faq-card" data-category="itm">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🚰</div>
+                                    <h3>ما هو دور صمام التحكم الرئيسي (OS&Y Valve) في نظام الرش الرطب؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>هو صمام تحكم ينظم إمدادات المياه للشبكة. ويتميز ببروز ذراعه اللولبي خارجياً عندما يكون مفتوحاً بالكامل، مما يتيح للمفتشين والمهندسين التأكد بصرياً وسريعاً من أن الصمام مفتوح.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card 8 -->
+                        <div class="faq-card" data-category="general">
+                            <div class="faq-card-inner">
+                                <div class="faq-card-front">
+                                    <div class="faq-card-icon">🎓</div>
+                                    <h3>هل يحتاج موظفو السلامة إلى شهادات معتمدة لممارسة عملهم بالمملكة؟</h3>
+                                    <span class="faq-hint">اضغط لعرض الإجابة</span>
+                                </div>
+                                <div class="faq-card-back">
+                                    <h3>الإجابة</h3>
+                                    <p>نعم، تفرض الأنظمة تسجيل واعتماد ممارسي السلامة والصحة المهنية عبر المنصات الرسمية لوزارة الموارد البشرية والحصول على الشهادات والكوادر التدريبية المعتمدة لمزاولة المهنة.</p>
+                                    <span class="faq-hint">اضغط للعودة</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        // Flip Logic
+                        const cards = document.querySelectorAll('.faq-card');
+                        cards.forEach(card => {
+                            card.addEventListener('click', () => {
+                                card.classList.toggle('flipped');
+                            });
+                        });
+
+                        // Filter Logic
+                        const tabs = document.querySelectorAll('.faq-tab');
+                        tabs.forEach(tab => {
+                            tab.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                tabs.forEach(t => t.classList.remove('active'));
+                                tab.classList.add('active');
+
+                                const category = tab.getAttribute('data-category');
+                                cards.forEach(card => {
+                                    const cardCategory = card.getAttribute('data-category');
+                                    
+                                    // Smooth fade animation during filtering
+                                    if (category === 'all' || cardCategory === category) {
+                                        card.style.display = '';
+                                        setTimeout(() => {
+                                            card.style.opacity = '1';
+                                            card.style.transform = 'scale(1)';
+                                        }, 10);
+                                    } else {
+                                        card.style.opacity = '0';
+                                        card.style.transform = 'scale(0.8)';
+                                        setTimeout(() => {
+                                            card.style.display = 'none';
+                                        }, 300);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                </script>
+
             </div>
         </div>
     </main>
