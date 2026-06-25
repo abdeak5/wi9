@@ -817,8 +817,9 @@
                        </div>
                 </div>
 
-                <div style="margin-top: 25px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div style="margin-top: 25px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 20px; flex-wrap: wrap;">
                     <button class="btn" id="save-edit-btn" onclick="saveEditedPost()">حفظ التعديلات</button>
+                    <button class="btn" style="background-color: #2ec4b6;" onclick="resyncEditPost()">🔄 إعادة تنسيق ومزامنة النص</button>
                     <button class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
                 </div>
             </div>
@@ -1696,7 +1697,7 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
                 document.getElementById('edit-image-preview').style.display = 'none';
                 editEncodedImage = '';
 
-                document.getElementById('edit-post-content').value = post.content || '';
+                document.getElementById('edit-post-content').value = htmlToPlainText(post.content || '');
                 
                 editModal.style.display = 'block';
             } catch (err) {
@@ -1948,45 +1949,58 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
         // ====== ARTICLE RE-SYNC HELPERS ======
         function htmlToPlainText(html) {
             if (!html) return '';
+            
+            // Temporary DOM element to replace bold and italics with markdown syntax first
             let temp = document.createElement('div');
             temp.innerHTML = html;
             
-            let result = '';
-            
-            Array.from(temp.childNodes).forEach(node => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const tag = node.tagName.toLowerCase();
-                    if (tag === 'h3') {
-                        result += '\n# ' + node.textContent.trim() + '\n\n';
-                    } else if (tag === 'h4') {
-                        result += '\n## ' + node.textContent.trim() + '\n\n';
-                    } else if (tag === 'blockquote') {
-                        result += '\n> ' + node.textContent.trim() + '\n\n';
-                    } else if (tag === 'ul') {
-                        Array.from(node.querySelectorAll('li')).forEach(li => {
-                            let text = li.textContent.trim();
-                            if (text.startsWith('•')) text = text.substring(1).trim();
-                            result += '* ' + text + '\n';
-                        });
-                        result += '\n';
-                    } else if (tag === 'p') {
-                        const text = node.textContent.trim();
-                        if (text) {
-                            result += text + '\n\n';
-                        }
-                    } else {
-                        const text = node.textContent.trim();
-                        if (text) {
-                            result += text + '\n\n';
-                        }
-                    }
-                } else if (node.nodeType === Node.TEXT_NODE) {
-                    const text = node.textContent.trim();
-                    if (text) result += text + '\n';
-                }
+            // Convert strong/b to markdown **
+            temp.querySelectorAll('strong, b').forEach(el => {
+                el.outerHTML = '**' + el.innerHTML + '**';
             });
             
-            return result.replace(/\n{3,}/g, '\n\n').trim();
+            // Convert em/i to markdown *
+            temp.querySelectorAll('em, i').forEach(el => {
+                el.outerHTML = '*' + el.innerHTML + '*';
+            });
+            
+            let text = temp.innerHTML;
+            
+            // Convert basic HTML structure to Markdown
+            text = text
+                .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n# $1\n\n')
+                .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n## $1\n\n')
+                .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, '\n> $1\n\n')
+                .replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, '\n$1\n')
+                .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '* $1\n')
+                .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '\n$1\n\n')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<[^>]+>/g, ''); // Strip all other remaining HTML tags
+                
+            // Decode HTML entities
+            const decoder = document.createElement('div');
+            decoder.innerHTML = text;
+            text = decoder.textContent || decoder.innerText || text;
+            
+            // Fix collapsed sentences (no spaces after dots or colons) - split into double newlines for separate blocks
+            text = text.replace(/\.(?=[^\s\d\.\,\u0660-\u0669])/g, '.\n\n');
+            text = text.replace(/\:(?=[^\s\d\u0660-\u0669])/g, ':\n\n');
+            text = text.replace(/\?(?=[^\s])/g, '?\n\n');
+            text = text.replace(/\؟(?=[^\s])/g, '؟\n\n');
+
+            // Insert newlines before common Arabic ordinals/headings to restore structure
+            const headingRegex = /(أولاً|اولا|أولا|ثانياً|ثانيا|ثالعاً|ثالثا|رابعاً|رابعا|خامساً|خامسا|سادساً|سادسا|سابعاً|سابعا|ثامناً|ثامنا|تاسعاً|تاسعا|عاشراً|عاشرا)([:\-\s]|$)/g;
+            text = text.replace(headingRegex, '\n\n$1\n\n');
+            
+            // Add newlines before numbered items (e.g., 1. , 2. , 3. )
+            text = text.replace(/(\d+[\.\-\)])\s*/g, '\n\n$1 ');
+            
+            // Add newlines before markers and highlights
+            text = text.replace(/(📌|خلاصة|تنبيه|ملاحظة)[:\s]*/g, '\n\n📌 $1: ');
+            
+            // Split and clean line-by-line
+            const lines = text.split('\n').map(l => l.trim());
+            return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
         }
 
         function resyncEditPost() {
