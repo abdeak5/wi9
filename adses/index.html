@@ -1216,7 +1216,7 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
         function autoFormat(text) {
             if (!text.trim()) return '';
             
-            // If the text already looks like HTML, do not format it again to prevent double formatting
+            // If the text already looks like HTML, do not format it again
             const trimmedText = text.trim();
             if (trimmedText.startsWith('<') && (trimmedText.includes('</p>') || trimmedText.includes('</h3>') || trimmedText.includes('</h4>') || trimmedText.includes('</ul>'))) {
                 return text;
@@ -1229,48 +1229,46 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
             lines.forEach(line => {
                 let trimmed = line.trim();
                 if (!trimmed) {
-                    if (inList) {
-                        result += '</ul>';
-                        inList = false;
-                    }
+                    if (inList) { result += '</ul>'; inList = false; }
                     return;
                 }
 
                 // Headers starting with #
-                if (trimmed.startsWith('# ')) {
+                if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
                     if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h3 class="post-sub-title" style="color: var(--accent-orange); margin: 30px 0 15px 0; font-size: 20px; font-weight: 700; border-bottom: 2px solid rgba(224, 86, 36, 0.1); padding-bottom: 8px;">${trimmed.substring(2)}</h3>`;
-                } else if (trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
+                    result += `<h4 style="color: #0d1e3d; margin: 25px 0 12px 0; font-size: 18px; font-weight: 700;">${trimmed.replace(/^#+\s+/, '')}</h4>`;
+                } else if (trimmed.startsWith('# ')) {
                     if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h4 class="post-sub-sub-title" style="color: var(--primary-dark); margin: 25px 0 10px 0; font-size: 17px; font-weight: 700;">${trimmed.replace(/^#+\s+/, '')}</h4>`;
+                    result += `<h3 style="color: #f39c12; margin: 30px 0 15px 0; font-size: 21px; font-weight: 800; border-bottom: 3px solid rgba(243, 156, 18, 0.15); padding-bottom: 8px;">${trimmed.substring(2)}</h3>`;
                 }
                 // Bullet points
                 else if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
                     if (!inList) {
-                        result += '<ul style="margin: 20px 20px 20px 0; padding-right: 20px; list-style-type: square; color: var(--text-dark); line-height: 1.8;">';
+                        result += '<ul style="margin: 20px 20px 25px 0; padding-right: 25px; list-style-type: none;">';
                         inList = true;
                     }
-                    result += `<li style="margin-bottom: 10px;">${trimmed.substring(2)}</li>`;
+                    let liText = trimmed.substring(2)
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>');
+                    result += `<li style="margin-bottom: 12px; position: relative; padding-right: 20px; font-size: 16px; line-height: 1.9; color: #2c3e50;"><span style="color: #f39c12; font-weight: bold; position: absolute; right: 0; top: 0;">•</span>${liText}</li>`;
                 }
                 // Blockquotes
                 else if (trimmed.startsWith('> ')) {
                     if (inList) { result += '</ul>'; inList = false; }
-                    result += `<blockquote style="border-right: 4px solid var(--accent-orange); padding: 15px 25px; margin: 25px 0; font-style: italic; color: #555; background: rgba(0,0,0,0.02);">${trimmed.substring(2)}</blockquote>`;
+                    result += `<blockquote style="border-right: 4px solid #f39c12; padding: 15px 25px; margin: 25px 0; font-style: italic; color: #555; background: rgba(243, 156, 18, 0.04); border-radius: 6px;">${trimmed.substring(2)}</blockquote>`;
                 }
-                // Short numbered headings or clear points (e.g. 1. / 2. / أولاً: / ثانياً:)
-                else if (/^(\d+\.|أولاً:|ثانياً:|ثالثاً:|رابعاً:|خامساً:)/.test(trimmed) && trimmed.length < 120) {
+                // Short numbered headings or Arabic ordinals
+                else if (/^(\d+[\.\-\)]|أولاً[:\s]|ثانياً[:\s]|ثالثاً[:\s]|رابعاً[:\s]|خامساً[:\s]|سادساً[:\s]|سابعاً[:\s]|ثامناً[:\s]|تاسعاً[:\s]|عاشراً[:\s])/.test(trimmed) && trimmed.length < 120) {
                     if (inList) { result += '</ul>'; inList = false; }
-                    result += `<h3 class="post-sub-title" style="color: var(--accent-orange); margin: 30px 0 15px 0; font-size: 19px; font-weight: 700;">${trimmed}</h3>`;
+                    result += `<h3 style="color: #f39c12; margin: 28px 0 14px 0; font-size: 19px; font-weight: 700;">${trimmed}</h3>`;
                 }
                 // Regular Paragraph
                 else {
                     if (inList) { result += '</ul>'; inList = false; }
-                    // Apply highlighting style to text inside quotes or asterisks in paragraphs
                     let formattedLine = trimmed
-                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: var(--primary-dark); font-weight: 700;">$1</strong>')
-                        .replace(/"([^"]+)"/g, '<span style="color: var(--accent-orange); font-weight: 600;">"$1"</span>');
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>')
+                        .replace(/"([^"]+)"/g, '<span style="color: #f39c12; font-weight: 600;">"$1"</span>');
                     
-                    result += `<p style="font-size: 16px; line-height: 2; margin-bottom: 20px; color: var(--text-dark); text-align: justify;">${formattedLine}</p>`;
+                    result += `<p style="font-size: 16.5px; line-height: 2; margin-bottom: 18px; color: #2c3e50; text-align: justify;">${formattedLine}</p>`;
                 }
             });
 

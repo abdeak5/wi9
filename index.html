@@ -3200,6 +3200,17 @@
             margin-bottom: 12px;
             padding-right: 5px;
         }
+        .single-post-content h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 28px 0 12px;
+            line-height: 1.5;
+        }
+        .single-post-content strong {
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
         .single-post-footer {
             margin-top: 30px;
             padding-top: 25px;
@@ -3542,7 +3553,7 @@
         const BLOGGER_URL = 'https://wiqayahpro.blogspot.com';
         const CACHE_KEY = 'wiqayah_posts_cache';
         const CACHE_TIME_KEY = 'wiqayah_posts_cache_time';
-        const REFRESH_INTERVAL = 4 * 60 * 1000; // 4 minutes
+        const REFRESH_INTERVAL = 30 * 1000; // 30 seconds - posts appear almost instantly
 
         let allPosts = [];
         let activeCategory = 'الرئيسية';
@@ -3670,6 +3681,64 @@
             }
         }
 
+        // Auto-format plain text content to professional HTML
+        function autoFormatContent(text) {
+            if (!text || !text.trim()) return '';
+            const trimmed = text.trim();
+            // If already formatted HTML, return as-is
+            if (trimmed.startsWith('<') && (trimmed.includes('</p>') || trimmed.includes('</h3>') || trimmed.includes('</h4>') || trimmed.includes('</ul>') || trimmed.includes('</div>'))) {
+                return text;
+            }
+            const lines = text.split('\n');
+            let result = '';
+            let inList = false;
+
+            lines.forEach(function(line) {
+                let t = line.trim();
+                if (!t) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    return;
+                }
+                // Markdown-style headers
+                if (t.startsWith('### ') || t.startsWith('## ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += '<h4 style="color: #0d1e3d; margin: 25px 0 12px 0; font-size: 18px; font-weight: 700;">' + t.replace(/^#+\s+/, '') + '</h4>';
+                } else if (t.startsWith('# ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += '<h3 style="color: #f39c12; margin: 30px 0 15px 0; font-size: 21px; font-weight: 800; border-bottom: 3px solid rgba(243, 156, 18, 0.15); padding-bottom: 8px;">' + t.substring(2) + '</h3>';
+                }
+                // Bullet points
+                else if (t.startsWith('* ') || t.startsWith('- ') || t.startsWith('\u2022 ')) {
+                    if (!inList) {
+                        result += '<ul style="margin: 20px 20px 25px 0; padding-right: 25px; list-style-type: none;">';
+                        inList = true;
+                    }
+                    var liText = t.substring(2).replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>');
+                    result += '<li style="margin-bottom: 12px; position: relative; padding-right: 20px; font-size: 16px; line-height: 1.9; color: #2c3e50;"><span style="color: #f39c12; font-weight: bold; position: absolute; right: 0; top: 0;">\u2022</span>' + liText + '</li>';
+                }
+                // Blockquotes
+                else if (t.startsWith('> ')) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += '<blockquote style="border-right: 4px solid #f39c12; padding: 15px 25px; margin: 25px 0; font-style: italic; color: #555; background: rgba(243, 156, 18, 0.04); border-radius: 6px;">' + t.substring(2) + '</blockquote>';
+                }
+                // Numbered headings or Arabic ordinals (short lines)
+                else if (/^(\d+[\.\-\)]|\u0623\u0648\u0644\u0627\u064b[:\s]|\u062b\u0627\u0646\u064a\u0627\u064b[:\s]|\u062b\u0627\u0644\u062b\u0627\u064b[:\s]|\u0631\u0627\u0628\u0639\u0627\u064b[:\s]|\u062e\u0627\u0645\u0633\u0627\u064b[:\s]|\u0633\u0627\u062f\u0633\u0627\u064b[:\s]|\u0633\u0627\u0628\u0639\u0627\u064b[:\s]|\u062b\u0627\u0645\u0646\u0627\u064b[:\s]|\u062a\u0627\u0633\u0639\u0627\u064b[:\s]|\u0639\u0627\u0634\u0631\u0627\u064b[:\s])/.test(t) && t.length < 120) {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    result += '<h3 style="color: #f39c12; margin: 28px 0 14px 0; font-size: 19px; font-weight: 700;">' + t + '</h3>';
+                }
+                // Regular paragraph
+                else {
+                    if (inList) { result += '</ul>'; inList = false; }
+                    var formatted = t
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>')
+                        .replace(/"([^"]+)"/g, '<span style="color: #f39c12; font-weight: 600;">"$1"</span>');
+                    result += '<p style="font-size: 16.5px; line-height: 2; margin-bottom: 18px; color: #2c3e50; text-align: justify;">' + formatted + '</p>';
+                }
+            });
+            if (inList) result += '</ul>';
+            return result;
+        }
+
         async function fetchSupabasePosts() {
             const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
             const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
@@ -3692,7 +3761,7 @@
                     return {
                         id: 'sb-' + post.id,
                         title: post.title,
-                        content: post.content,
+                        content: autoFormatContent(post.content),
                         excerpt: excerpt,
                         publishDate: post.created_at || new Date().toISOString(),
                         categories: post.categories || [],
