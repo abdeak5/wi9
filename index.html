@@ -3786,7 +3786,14 @@
                     return content + adCode;
                 }
 
-                const processedContent = insertMiddleAd(post.content);
+                // Clean up any incorrect light theme colors in post content
+                let cleanContent = post.content || '';
+                cleanContent = cleanContent
+                    .replace(/color:\s*#d1d8e0/gi, 'color: var(--text-dark)')
+                    .replace(/color:\s*var\(--text-light\)/gi, 'color: var(--text-dark)')
+                    .replace(/color:\s*rgb\(209,\s*216,\s*224\)/gi, 'color: var(--text-dark)');
+
+                const processedContent = insertMiddleAd(cleanContent);
 
                 singlePostView.innerHTML =
                     '<button class="single-post-back-btn" onclick="window.location.hash=\'home\';">' +
