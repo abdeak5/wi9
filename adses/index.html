@@ -539,12 +539,13 @@
         <div class="auth-card">
             <img class="auth-logo" src="https://files.catbox.moe/bqi01n.png" alt="وقاية برو">
             <h2 class="auth-title">لوحة التحكم وقاية برو</h2>
-            <p class="auth-desc">الرجاء إدخال رمز المرور لمتابعة إدارة الموقع</p>
+            <p class="auth-desc">الرجاء تسجيل الدخول لمتابعة إدارة الموقع</p>
             <div class="form-group">
-                <input type="password" id="auth-pin" placeholder="رمز المرور (الافتراضي: admin123)">
+                <input type="email" id="auth-email" placeholder="البريد الإلكتروني" style="margin-bottom: 12px;">
+                <input type="password" id="auth-password" placeholder="كلمة المرور">
             </div>
-            <button class="btn" style="width: 100%;" onclick="validatePin()">دخول</button>
-            <p id="auth-error" style="color: var(--error); font-size: 12px; margin-top: 15px; display: none;">رمز المرور غير صحيح!</p>
+            <button class="btn" style="width: 100%;" onclick="validateLogin()">دخول</button>
+            <p id="auth-error" style="color: var(--error); font-size: 12px; margin-top: 15px; display: none;">البريد الإلكتروني أو كلمة المرور غير صحيحة!</p>
         </div>
     </div>
 
@@ -831,10 +832,11 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
             });
         };
 
-        function validatePin() {
-            const input = document.getElementById('auth-pin').value;
-            // Admin password (Default check)
-            if (input === 'admin123' || input === 'wiqayah123') {
+        function validateLogin() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            if (email === 'wiqayahpro@gmail.com' && password === '123456Mo@') {
                 sessionStorage.setItem('wiqayah_authenticated', 'true');
                 document.getElementById('auth-overlay').style.opacity = '0';
                 setTimeout(() => {
