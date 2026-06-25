@@ -1585,6 +1585,37 @@
             color: var(--primary-dark);
         }
 
+        
+        /* Post sharing & PDF download styles */
+        .share-icon-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.7) !important;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .share-icon-btn:hover {
+            transform: translateY(-2px);
+            color: white !important;
+        }
+        .share-icon-btn.whatsapp:hover { background: #25D366; border-color: #25D366; }
+        .share-icon-btn.telegram:hover { background: #0088cc; border-color: #0088cc; }
+        .share-icon-btn.linkedin:hover { background: #0077b5; border-color: #0077b5; }
+        .share-icon-btn.twitter:hover { background: #111; border-color: #111; }
+        .btn-pdf-download {
+            transition: all 0.3s ease;
+        }
+        .btn-pdf-download:hover {
+            background: rgba(224, 86, 36, 0.2) !important;
+            transform: translateY(-2px);
+        }
+
         /* 5. Search Overlay (Full-screen Glassmorphic Search) */
         .search-overlay {
             position: fixed;
@@ -2191,6 +2222,8 @@
             }
         })();
     </script>
+    <!-- html2pdf.js library for professional PDF downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Reading Progress Bar -->
@@ -3864,6 +3897,28 @@
                         '</div>' +
                     '</header>' +
                     
+                    '<div class="post-actions-toolbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); margin: 20px 0; gap: 15px;">' +
+                        '<button onclick="downloadPostPDF(\'' + post.id + '\', \'' + post.title.replace(/'/g, "\\'") + '\')" class="btn-pdf-download" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(224, 86, 36, 0.1); border: 1px solid rgba(224, 86, 36, 0.3); color: var(--accent-orange); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: \'Noto Kufi Arabic\', sans-serif;">' +
+                            '<svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>' +
+                            'تحميل المقال كـ PDF (وثيقة معتمدة)' +
+                        '</button>' +
+                        '<div style="display: flex; align-items: center; gap: 10px;">' +
+                            '<span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">مشاركة المقال:</span>' +
+                            '<a href="https://api.whatsapp.com/send?text=' + encodeURIComponent(post.title + ' - ') + encodeURIComponent(window.location.href) + '" target="_blank" class="share-icon-btn whatsapp" title="واتساب">' +
+                                '<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.292 1.48 5.405 1.481 5.361 0 9.724-4.36 9.727-9.723.002-2.6-1.01-5.043-2.85-6.887C17.09 2.181 14.645 1.169 12.01 1.169c-5.362 0-9.726 4.361-9.729 9.725-.001 2.185.58 4.316 1.683 6.132l-.991 3.616 3.674-.963zm10.177-6.828c-.278-.139-1.643-.81-1.9-.904-.256-.093-.443-.139-.63.139-.187.279-.724.904-.887 1.091-.162.186-.325.21-.603.07-2.73-1.362-3.886-2.495-4.542-3.626-.162-.28-.017-.43.122-.57.125-.125.278-.325.417-.487.139-.163.187-.279.278-.465.093-.186.047-.349-.023-.487-.07-.139-.63-1.517-.862-2.074-.226-.543-.454-.47-.63-.47h-.538c-.187 0-.49.07-.747.349-.256.279-.979.957-.979 2.333 0 1.377.997 2.709 1.137 2.894.139.186 1.962 2.997 4.753 4.202.664.287 1.183.458 1.587.587.667.212 1.275.182 1.756.11.536-.079 1.643-.67 1.875-1.317.232-.648.232-1.205.162-1.317-.07-.113-.256-.186-.534-.325z"/></svg>' +
+                            '</a>' +
+                            '<a href="https://t.me/share/url?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(post.title) + '" target="_blank" class="share-icon-btn telegram" title="تيليجرام">' +
+                                '<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M11.944 0C5.347 0 0 5.347 0 11.944c0 6.595 5.347 11.944 11.944 11.944 6.595 0 11.944-5.349 11.944-11.944C23.888 5.347 18.539 0 11.944 0zm5.282 8.314l-1.8 8.484c-.135.604-.493.754-.997.472l-2.74-2.02-1.322 1.272c-.147.147-.269.269-.553.269l.197-2.793 5.086-4.593c.221-.197-.048-.307-.343-.111l-6.287 3.958-2.707-.847c-.588-.184-.6-.588.123-.871l10.567-4.072c.49-.18.919.113.774.832z"/></svg>' +
+                            '</a>' +
+                            '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(window.location.href) + '" target="_blank" class="share-icon-btn linkedin" title="لينكد إن">' +
+                                '<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>' +
+                            '</a>' +
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(post.title) + '" target="_blank" class="share-icon-btn twitter" title="إكس / تويتر">' +
+                                '<svg viewBox="0 0 24 24" style="width: 12px; height: 12px; fill: currentColor;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
+                            '</a>' +
+                        '</div>' +
+                    '</div>' +
+
                     '<div class="single-post-cover-container" style="width: 100%; max-height: 480px; overflow: hidden; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">' +
                         '<img src="' + imgSrc + '" alt="' + post.title + '" style="width: 100%; height: auto; object-fit: cover; max-height: 480px; display: block;">' +
                     '</div>' +
@@ -4253,6 +4308,111 @@
             const words = text.split(/\s+/).length;
             return Math.max(1, Math.ceil(words / 200));
         }
+
+        // PDF Downloader with Watermark
+        function downloadPostPDF(postId, title) {
+            const articleElement = document.querySelector('.single-post-content').cloneNode(true);
+            
+            // Create container for PDF printing
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.padding = '35px';
+            pdfContainer.style.color = '#000000'; // Make text black for printing
+            pdfContainer.style.fontFamily = "'Noto Kufi Arabic', sans-serif";
+            pdfContainer.style.position = 'relative';
+            pdfContainer.style.backgroundColor = '#ffffff';
+            pdfContainer.setAttribute('dir', 'rtl');
+
+            // Add header with website logo and title
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.style.borderBottom = '2px solid #e05624';
+            header.style.paddingBottom = '15px';
+            header.style.marginBottom = '25px';
+            header.innerHTML = `
+                <div style="text-align: right;">
+                    <h1 style="font-size: 24px; font-weight: 800; color: #0d1e3d; margin: 0 0 5px 0;">وقاية برو | WIQAYAH PRO</h1>
+                    <p style="font-size: 11px; color: #555; margin: 0;">البوابة العربية للهندسة والوقاية وعلوم مكافحة الحريق</p>
+                </div>
+                <img src="https://files.catbox.moe/bqi01n.png" style="height: 65px;" alt="شعار وقاية برو">
+            `;
+            pdfContainer.appendChild(header);
+
+            // Add article title
+            const articleTitle = document.createElement('h2');
+            articleTitle.style.fontSize = '20px';
+            articleTitle.style.color = '#0d1e3d';
+            articleTitle.style.marginBottom = '20px';
+            articleTitle.style.fontWeight = '800';
+            articleTitle.style.textAlign = 'right';
+            articleTitle.innerText = title;
+            pdfContainer.appendChild(articleTitle);
+
+            // Add watermark container
+            const watermark = document.createElement('div');
+            watermark.style.position = 'absolute';
+            watermark.style.top = '50%';
+            watermark.style.left = '50%';
+            watermark.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
+            watermark.style.opacity = '0.06';
+            watermark.style.zIndex = '0';
+            watermark.style.pointerEvents = 'none';
+            watermark.style.textAlign = 'center';
+            watermark.style.width = '100%';
+            watermark.innerHTML = `
+                <img src="https://files.catbox.moe/bqi01n.png" style="width: 480px;" alt="Watermark Logo">
+                <h2 style="font-size: 70px; color: #0d1e3d; margin-top: 15px; font-weight: 800;">وقاية برو</h2>
+            `;
+            pdfContainer.appendChild(watermark);
+
+            // Prepare article content (clean ads, keep text clean)
+            const ads = articleElement.querySelectorAll('.post-ad-wrapper');
+            ads.forEach(ad => ad.remove());
+
+            // Append article content
+            const contentWrap = document.createElement('div');
+            contentWrap.style.position = 'relative';
+            contentWrap.style.zIndex = '1';
+            contentWrap.style.fontSize = '14px';
+            contentWrap.style.lineHeight = '1.8';
+            contentWrap.style.textAlign = 'right';
+            contentWrap.innerHTML = articleElement.innerHTML;
+            pdfContainer.appendChild(contentWrap);
+
+            // Add footer
+            const footer = document.createElement('div');
+            footer.style.borderTop = '1px solid #eee';
+            footer.style.paddingTop = '15px';
+            footer.style.marginTop = '35px';
+            footer.style.textAlign = 'center';
+            footer.style.fontSize = '10px';
+            footer.style.color = '#777';
+            footer.innerHTML = `
+                <p>تم تحميل هذا المقال من موقع وقاية برو (wiqayah.pro) &copy; 2026. جميع الحقوق محفوظة.</p>
+            `;
+            pdfContainer.appendChild(footer);
+
+            // Append to body temporarily for rendering
+            document.body.appendChild(pdfContainer);
+
+            // html2pdf options
+            const opt = {
+                margin:       [15, 15, 15, 15],
+                filename:     title.replace(/\s+/g, '_') + '.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate PDF
+            html2pdf().from(pdfContainer).set(opt).save().then(() => {
+                document.body.removeChild(pdfContainer);
+            }).catch(err => {
+                console.error('PDF Generation failed:', err);
+                document.body.removeChild(pdfContainer);
+            });
+        }
     </script>
 
     <!-- Cookie Consent Banner -->
@@ -4289,6 +4449,204 @@
                 });
             }
         });
+    </script>
+
+    <!-- Global Live Search functionality -->
+    <script>
+        (function() {
+            document.addEventListener('DOMContentLoaded', () => {
+                const searchInput = document.querySelector('#search-overlay .search-input-wrapper input');
+                const searchForm = document.querySelector('#search-overlay form');
+                const popularSearches = document.querySelector('#search-overlay .popular-searches');
+                const searchToggle = document.querySelector('.header-search-toggle');
+                
+                if (!searchInput || !popularSearches) return;
+
+                // Create results container
+                const resultsContainer = document.createElement('div');
+                resultsContainer.className = 'search-results-wrapper';
+                resultsContainer.id = 'global-search-results';
+                resultsContainer.style.display = 'none';
+                popularSearches.parentNode.insertBefore(resultsContainer, popularSearches.nextSibling);
+                
+                // Add styles dynamically
+                const styles = document.createElement('style');
+                styles.innerHTML = `
+                    .search-results-wrapper {
+                        background: rgba(13, 30, 61, 0.4);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        backdrop-filter: blur(10px);
+                        border-radius: 12px;
+                        padding: 15px;
+                        margin-top: 25px;
+                        max-height: 320px;
+                        overflow-y: auto;
+                        text-align: right;
+                    }
+                    .search-result-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                        padding: 12px;
+                        border-radius: 10px;
+                        background: rgba(255, 255, 255, 0.02);
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        margin-bottom: 10px;
+                        transition: all 0.3s ease;
+                        text-decoration: none;
+                        color: inherit;
+                        cursor: pointer;
+                    }
+                    .search-result-item:hover {
+                        background: rgba(224, 86, 36, 0.1);
+                        border-color: rgba(224, 86, 36, 0.3);
+                        transform: translateY(-2px);
+                    }
+                    .search-result-img {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 8px;
+                        object-fit: cover;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        flex-shrink: 0;
+                    }
+                    .search-result-info {
+                        flex-grow: 1;
+                    }
+                    .search-result-title {
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: #f8f9fa;
+                        margin-bottom: 5px;
+                        line-height: 1.4;
+                    }
+                    .search-result-meta {
+                        font-size: 11px;
+                        color: #e05624;
+                        font-weight: 600;
+                    }
+                    .search-no-results {
+                        text-align: center;
+                        padding: 20px;
+                        color: rgba(255, 255, 255, 0.5);
+                        font-size: 13px;
+                    }
+                `;
+                document.head.appendChild(styles);
+
+                let allPosts = [];
+                let isFetching = false;
+
+                const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+                const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+                // Fetch posts from Supabase once
+                async function fetchAllPosts() {
+                    if (allPosts.length > 0 || isFetching) return;
+                    isFetching = true;
+                    try {
+                        const response = await fetch(supabaseUrl + '/rest/v1/posts?select=id,title,categories,image,created_at&order=created_at.desc', {
+                            headers: {
+                                'apikey': supabaseKey,
+                                'Authorization': 'Bearer ' + supabaseKey
+                            }
+                        });
+                        if (response.ok) {
+                            allPosts = await response.json();
+                        }
+                    } catch (e) {
+                        console.error('Error loading posts for search:', e);
+                    } finally {
+                        isFetching = false;
+                    }
+                }
+
+                // Focus/Click listener to load posts
+                searchInput.addEventListener('focus', fetchAllPosts);
+                if (searchToggle) {
+                    searchToggle.addEventListener('click', fetchAllPosts);
+                }
+
+                // Handle tag clicks
+                document.querySelectorAll('#search-overlay .popular-search-tag').forEach(tag => {
+                    tag.addEventListener('click', () => {
+                        const val = tag.textContent.trim();
+                        searchInput.value = val;
+                        performFilter(val);
+                    });
+                });
+
+                // Form submit handler
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    performFilter(searchInput.value.trim());
+                });
+
+                // Input listener for live search
+                searchInput.addEventListener('input', (e) => {
+                    performFilter(e.target.value.trim());
+                });
+
+                function performFilter(query) {
+                    if (!query) {
+                        resultsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.innerHTML = '<div style="text-align:center; padding: 15px; color:rgba(255,255,255,0.5);">جاري البحث...</div>';
+
+                    if (allPosts.length === 0 && !isFetching) {
+                        fetchAllPosts().then(() => doSearch(query));
+                    } else {
+                        doSearch(query);
+                    }
+                }
+
+                function doSearch(query) {
+                    const terms = query.toLowerCase().split(' ');
+                    const filtered = allPosts.filter(post => {
+                        const title = post.title.toLowerCase();
+                        const categories = (post.categories || []).join(' ').toLowerCase();
+                        return terms.every(t => title.includes(t) || categories.includes(t));
+                    });
+
+                    if (filtered.length === 0) {
+                        resultsContainer.innerHTML = '<div class="search-no-results">لا توجد نتائج تطابق بحثك. جرب كلمات أخرى.</div>';
+                        return;
+                    }
+
+                    resultsContainer.innerHTML = '';
+                    filtered.forEach(post => {
+                        const item = document.createElement('a');
+                        item.className = 'search-result-item';
+                        const isMain = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('wi9/') || window.location.pathname.endsWith('wi9');
+                        const prefix = isMain ? '' : 'index.html';
+                        item.setAttribute('href', prefix + '#post/' + post.id);
+                        
+                        item.addEventListener('click', () => {
+                            document.getElementById('search-overlay').classList.remove('active');
+                            document.body.style.overflow = '';
+                            if (isMain && typeof window.handleRouting === 'function') {
+                                setTimeout(() => window.handleRouting(), 50);
+                            }
+                        });
+
+                        const imgUrl = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                        const category = (post.categories && post.categories.length > 0) ? post.categories[0] : 'عام';
+                        
+                        item.innerHTML = `
+                            <img class="search-result-img" src="${imgUrl}" alt="${post.title}">
+                            <div class="search-result-info">
+                                <div class="search-result-title">${post.title}</div>
+                                <div class="search-result-meta">${category}</div>
+                            </div>
+                        `;
+                        resultsContainer.appendChild(item);
+                    });
+                }
+            });
+        })();
     </script>
 </body>
 </html>

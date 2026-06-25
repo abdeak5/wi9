@@ -2727,5 +2727,203 @@
             }
         });
     </script>
+
+    <!-- Global Live Search functionality -->
+    <script>
+        (function() {
+            document.addEventListener('DOMContentLoaded', () => {
+                const searchInput = document.querySelector('#search-overlay .search-input-wrapper input');
+                const searchForm = document.querySelector('#search-overlay form');
+                const popularSearches = document.querySelector('#search-overlay .popular-searches');
+                const searchToggle = document.querySelector('.header-search-toggle');
+                
+                if (!searchInput || !popularSearches) return;
+
+                // Create results container
+                const resultsContainer = document.createElement('div');
+                resultsContainer.className = 'search-results-wrapper';
+                resultsContainer.id = 'global-search-results';
+                resultsContainer.style.display = 'none';
+                popularSearches.parentNode.insertBefore(resultsContainer, popularSearches.nextSibling);
+                
+                // Add styles dynamically
+                const styles = document.createElement('style');
+                styles.innerHTML = `
+                    .search-results-wrapper {
+                        background: rgba(13, 30, 61, 0.4);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        backdrop-filter: blur(10px);
+                        border-radius: 12px;
+                        padding: 15px;
+                        margin-top: 25px;
+                        max-height: 320px;
+                        overflow-y: auto;
+                        text-align: right;
+                    }
+                    .search-result-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                        padding: 12px;
+                        border-radius: 10px;
+                        background: rgba(255, 255, 255, 0.02);
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        margin-bottom: 10px;
+                        transition: all 0.3s ease;
+                        text-decoration: none;
+                        color: inherit;
+                        cursor: pointer;
+                    }
+                    .search-result-item:hover {
+                        background: rgba(224, 86, 36, 0.1);
+                        border-color: rgba(224, 86, 36, 0.3);
+                        transform: translateY(-2px);
+                    }
+                    .search-result-img {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 8px;
+                        object-fit: cover;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        flex-shrink: 0;
+                    }
+                    .search-result-info {
+                        flex-grow: 1;
+                    }
+                    .search-result-title {
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: #f8f9fa;
+                        margin-bottom: 5px;
+                        line-height: 1.4;
+                    }
+                    .search-result-meta {
+                        font-size: 11px;
+                        color: #e05624;
+                        font-weight: 600;
+                    }
+                    .search-no-results {
+                        text-align: center;
+                        padding: 20px;
+                        color: rgba(255, 255, 255, 0.5);
+                        font-size: 13px;
+                    }
+                `;
+                document.head.appendChild(styles);
+
+                let allPosts = [];
+                let isFetching = false;
+
+                const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+                const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+                // Fetch posts from Supabase once
+                async function fetchAllPosts() {
+                    if (allPosts.length > 0 || isFetching) return;
+                    isFetching = true;
+                    try {
+                        const response = await fetch(supabaseUrl + '/rest/v1/posts?select=id,title,categories,image,created_at&order=created_at.desc', {
+                            headers: {
+                                'apikey': supabaseKey,
+                                'Authorization': 'Bearer ' + supabaseKey
+                            }
+                        });
+                        if (response.ok) {
+                            allPosts = await response.json();
+                        }
+                    } catch (e) {
+                        console.error('Error loading posts for search:', e);
+                    } finally {
+                        isFetching = false;
+                    }
+                }
+
+                // Focus/Click listener to load posts
+                searchInput.addEventListener('focus', fetchAllPosts);
+                if (searchToggle) {
+                    searchToggle.addEventListener('click', fetchAllPosts);
+                }
+
+                // Handle tag clicks
+                document.querySelectorAll('#search-overlay .popular-search-tag').forEach(tag => {
+                    tag.addEventListener('click', () => {
+                        const val = tag.textContent.trim();
+                        searchInput.value = val;
+                        performFilter(val);
+                    });
+                });
+
+                // Form submit handler
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    performFilter(searchInput.value.trim());
+                });
+
+                // Input listener for live search
+                searchInput.addEventListener('input', (e) => {
+                    performFilter(e.target.value.trim());
+                });
+
+                function performFilter(query) {
+                    if (!query) {
+                        resultsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.innerHTML = '<div style="text-align:center; padding: 15px; color:rgba(255,255,255,0.5);">جاري البحث...</div>';
+
+                    if (allPosts.length === 0 && !isFetching) {
+                        fetchAllPosts().then(() => doSearch(query));
+                    } else {
+                        doSearch(query);
+                    }
+                }
+
+                function doSearch(query) {
+                    const terms = query.toLowerCase().split(' ');
+                    const filtered = allPosts.filter(post => {
+                        const title = post.title.toLowerCase();
+                        const categories = (post.categories || []).join(' ').toLowerCase();
+                        return terms.every(t => title.includes(t) || categories.includes(t));
+                    });
+
+                    if (filtered.length === 0) {
+                        resultsContainer.innerHTML = '<div class="search-no-results">لا توجد نتائج تطابق بحثك. جرب كلمات أخرى.</div>';
+                        return;
+                    }
+
+                    resultsContainer.innerHTML = '';
+                    filtered.forEach(post => {
+                        const item = document.createElement('a');
+                        item.className = 'search-result-item';
+                        const isMain = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('wi9/') || window.location.pathname.endsWith('wi9');
+                        const prefix = isMain ? '' : 'index.html';
+                        item.setAttribute('href', prefix + '#post/' + post.id);
+                        
+                        item.addEventListener('click', () => {
+                            document.getElementById('search-overlay').classList.remove('active');
+                            document.body.style.overflow = '';
+                            if (isMain && typeof window.handleRouting === 'function') {
+                                setTimeout(() => window.handleRouting(), 50);
+                            }
+                        });
+
+                        const imgUrl = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                        const category = (post.categories && post.categories.length > 0) ? post.categories[0] : 'عام';
+                        
+                        item.innerHTML = `
+                            <img class="search-result-img" src="${imgUrl}" alt="${post.title}">
+                            <div class="search-result-info">
+                                <div class="search-result-title">${post.title}</div>
+                                <div class="search-result-meta">${category}</div>
+                            </div>
+                        `;
+                        resultsContainer.appendChild(item);
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
