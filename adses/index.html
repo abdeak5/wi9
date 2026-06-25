@@ -1644,9 +1644,10 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
                         '<td style="padding: 12px 10px; font-weight: 700; color: var(--text-light);">' + post.title + '</td>' +
                         '<td style="padding: 12px 10px; color: var(--text-muted);">' + category + '</td>' +
                         '<td style="padding: 12px 10px; color: var(--text-muted);">' + formattedDate + '</td>' +
-                        '<td style="padding: 12px 10px; text-align: center; display: flex; justify-content: center; gap: 10px; align-items: center; min-height: 59px;">' +
-                            '<button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="openEditPost(' + post.id + ')">✏️ تعديل</button>' +
-                            '<button class="btn" style="padding: 6px 12px; font-size: 12px; background-color: var(--error);" onclick="deletePost(' + post.id + ')">🗑️ حذف</button>' +
+                        '<td style="padding: 12px 10px; text-align: center; display: flex; justify-content: center; gap: 8px; align-items: center; min-height: 59px; flex-wrap: wrap;">' +
+                            '<button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px;" onclick="openEditPost(' + post.id + ')">✏️ تعديل</button>' +
+                            '<button class="btn" style="padding: 6px 10px; font-size: 11px; background-color: #2ec4b6;" onclick="resyncPostFromList(' + post.id + ')">🔄 إعادة المزامنة</button>' +
+                            '<button class="btn" style="padding: 6px 10px; font-size: 11px; background-color: var(--error);" onclick="deletePost(' + post.id + ')">🗑️ حذف</button>' +
                         '</td>' +
                     '</tr>';
                 });
@@ -1943,6 +1944,100 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
                 checkNetworkStatus();
             }
         }, 15000);
+
+        // ====== ARTICLE RE-SYNC HELPERS ======
+        function htmlToPlainText(html) {
+            if (!html) return '';
+            let temp = document.createElement('div');
+            temp.innerHTML = html;
+            
+            let result = '';
+            
+            Array.from(temp.childNodes).forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'h3') {
+                        result += '\n# ' + node.textContent.trim() + '\n\n';
+                    } else if (tag === 'h4') {
+                        result += '\n## ' + node.textContent.trim() + '\n\n';
+                    } else if (tag === 'blockquote') {
+                        result += '\n> ' + node.textContent.trim() + '\n\n';
+                    } else if (tag === 'ul') {
+                        Array.from(node.querySelectorAll('li')).forEach(li => {
+                            let text = li.textContent.trim();
+                            if (text.startsWith('•')) text = text.substring(1).trim();
+                            result += '* ' + text + '\n';
+                        });
+                        result += '\n';
+                    } else if (tag === 'p') {
+                        const text = node.textContent.trim();
+                        if (text) {
+                            result += text + '\n\n';
+                        }
+                    } else {
+                        const text = node.textContent.trim();
+                        if (text) {
+                            result += text + '\n\n';
+                        }
+                    }
+                } else if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent.trim();
+                    if (text) result += text + '\n';
+                }
+            });
+            
+            return result.replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        function resyncEditPost() {
+            const textarea = document.getElementById('edit-post-content');
+            if (!textarea) return;
+            const currentHTML = textarea.value;
+            const plainText = htmlToPlainText(currentHTML);
+            const formattedHTML = autoFormat(plainText);
+            textarea.value = formattedHTML;
+            showAlert('🔄 تم إعادة مزامنة وتنسيق نص المحرر بنجاح! يمكنك الآن حفظ التعديلات لتعميمها.');
+        }
+
+        async function resyncPostFromList(postId) {
+            if (!confirm('هل ترغب في إعادة مزامنة وتنسيق هذا المقال برمجياً وفقاً للتحديثات الجديدة؟')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch post');
+                const posts = await response.json();
+                if (posts.length === 0) return;
+                
+                const post = posts[0];
+                const currentHTML = post.content || '';
+                const plainText = htmlToPlainText(currentHTML);
+                const formattedHTML = autoFormat(plainText);
+
+                const updateRes = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: formattedHTML
+                    })
+                });
+
+                if (!updateRes.ok) throw new Error('Failed to update post');
+
+                showAlert('🔄 تم إعادة مزامنة وتنسيق المقال بنجاح وحفظه دون إنشاء نسخة جديدة!');
+                loadManagePosts();
+                loadDashboardStats();
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء محاولة إعادة مزامنة المقال.', true);
+            }
+        }
     </script>
 </body>
 </html>
