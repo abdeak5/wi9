@@ -602,6 +602,7 @@
             <button class="tab-btn" onclick="switchTab(event, 'manage-posts-tab'); loadManagePosts()">إدارة المقالات</button>
             <button class="tab-btn" onclick="switchTab(event, 'inbox-tab'); loadInboxMessages()">الرسائل الواردة</button>
             <button class="tab-btn" onclick="switchTab(event, 'supabase-tab')">تهيئة قاعدة البيانات Supabase</button>
+            <button class="tab-btn" onclick="switchTab(event, 'network-tab'); checkNetworkStatus()">حالة الشبكة</button>
         </div>
 
         <!-- Alert messages -->
@@ -927,6 +928,105 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
                 <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.querySelector('pre code').innerText); alert('تم نسخ كود SQL بنجاح!')">
                     نسخ كود SQL بالكامل
                 </button>
+            </div>
+        </div>
+
+        <!-- TAB 5: Network Status -->
+        <div id="network-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>🌐</span> حالة اتصال الشبكة وقاعدة البيانات Supabase
+                </div>
+                
+                <div class="network-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Connection Indicator Card -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">حالة الاتصال</h4>
+                            <div id="net-status-text" style="font-size: 20px; font-weight: 700; color: var(--text-muted);">جاري الفحص...</div>
+                        </div>
+                        <div id="net-status-indicator" style="width: 24px; height: 24px; border-radius: 50%; background: var(--text-muted); box-shadow: 0 0 10px rgba(160, 174, 192, 0.5); transition: all 0.3s;"></div>
+                    </div>
+                    
+                    <!-- Response Time Card -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">زمن الاستجابة (Ping)</h4>
+                            <div id="net-ping-text" style="font-size: 20px; font-weight: 700; color: var(--text-light);">- ms</div>
+                        </div>
+                        <div style="font-size: 24px;">⚡</div>
+                    </div>
+
+                    <!-- API Endpoint Status Card -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">عنوان قاعدة البيانات</h4>
+                            <div id="net-url-text" style="font-size: 12px; font-weight: 600; color: var(--text-muted); word-break: break-all; direction: ltr; text-align: right;">https://hcoafdfhpizcgbbkcois.supabase.co</div>
+                        </div>
+                        <div style="font-size: 24px;">🔗</div>
+                    </div>
+                </div>
+
+                <!-- Tables Health Check -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span>📋</span> فحص الجداول والوصول إليها
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                        <!-- adsense_config table -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 13px; font-weight: 700;">جدول الإعدادات</span>
+                                <div id="tbl-adsense-rows" style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">صفوف: -</div>
+                            </div>
+                            <span id="tbl-adsense-status" style="font-size: 16px;">⏳</span>
+                        </div>
+                        <!-- posts table -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 13px; font-weight: 700;">جدول المقالات</span>
+                                <div id="tbl-posts-rows" style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">صفوف: -</div>
+                            </div>
+                            <span id="tbl-posts-status" style="font-size: 16px;">⏳</span>
+                        </div>
+                        <!-- messages table -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 13px; font-weight: 700;">جدول الرسائل</span>
+                                <div id="tbl-messages-rows" style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">صفوف: -</div>
+                            </div>
+                            <span id="tbl-messages-status" style="font-size: 16px;">⏳</span>
+                        </div>
+                        <!-- comments table -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 13px; font-weight: 700;">جدول التعليقات</span>
+                                <div id="tbl-comments-rows" style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">صفوف: -</div>
+                            </div>
+                            <span id="tbl-comments-status" style="font-size: 16px;">⏳</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Box -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span>📜</span> سجل عمليات التحقق
+                    </h3>
+                    <div id="net-logs-box" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.6; color: #a5b4fc; direction: ltr; text-align: left;">
+                        <div style="color: #6366f1">[النظام] السجل جاهز. انقر على 'فحص حالة الاتصال الآن' للبدء.</div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <button class="btn" onclick="checkNetworkStatus()">فحص حالة الاتصال الآن</button>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text-muted);">
+                        <input type="checkbox" id="auto-ping-check" checked style="accent-color: var(--accent-orange);">
+                        تفعيل الفحص التلقائي المستمر (كل 15 ثانية)
+                    </label>
+                    <button class="btn btn-secondary" onclick="clearNetLogs()" style="margin-right: auto;">مسح السجل</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1705,6 +1805,128 @@ CREATE POLICY "Allow anon delete messages" ON messages FOR DELETE USING (true);<
                 showAlert('حدث خطأ أثناء محاولة حذف المقال.', true);
             }
         }
+
+        // ====== NETWORK MONITORING (SUPABASE PING) ======
+        function logNetMessage(msg, type = 'info') {
+            const logsBox = document.getElementById('net-logs-box');
+            if (!logsBox) return;
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const colorMap = {
+                info: '#a5b4fc',
+                success: '#2ec4b6',
+                error: '#e71d36',
+                warning: '#f39c12'
+            };
+            const color = colorMap[type] || '#ffffff';
+            logsBox.innerHTML += `<div style="color: ${color}">[${timeStr}] ${msg}</div>`;
+            logsBox.scrollTop = logsBox.scrollHeight;
+        }
+
+        function clearNetLogs() {
+            const logsBox = document.getElementById('net-logs-box');
+            if (logsBox) logsBox.innerHTML = '<div style="color: #6366f1">[النظام] تم تصفير السجل.</div>';
+        }
+
+        async function checkNetworkStatus() {
+            const statusText = document.getElementById('net-status-text');
+            const statusInd = document.getElementById('net-status-indicator');
+            const pingText = document.getElementById('net-ping-text');
+            
+            if (!statusText || !statusInd || !pingText) return;
+
+            statusText.textContent = 'جاري الفحص...';
+            statusText.style.color = 'var(--text-muted)';
+            statusInd.style.background = 'var(--text-muted)';
+            statusInd.style.boxShadow = '0 0 10px rgba(160, 174, 192, 0.5)';
+
+            logNetMessage('بدء فحص الاتصال بقاعدة بيانات Supabase...', 'info');
+
+            const start = performance.now();
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/posts?select=id&limit=1`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+
+                const end = performance.now();
+                const latency = Math.round(end - start);
+
+                if (response.ok) {
+                    statusText.textContent = 'متصل';
+                    statusText.style.color = 'var(--success)';
+                    statusInd.style.background = 'var(--success)';
+                    statusInd.style.boxShadow = '0 0 12px rgba(46, 196, 182, 0.8)';
+                    pingText.textContent = `${latency} ms`;
+                    logNetMessage(`تم الاتصال بنجاح. زمن الاستجابة: ${latency}ms`, 'success');
+                } else {
+                    throw new Error(`كود الاستجابة: ${response.status}`);
+                }
+            } catch (err) {
+                statusText.textContent = 'فشل الاتصال';
+                statusText.style.color = 'var(--error)';
+                statusInd.style.background = 'var(--error)';
+                statusInd.style.boxShadow = '0 0 12px rgba(231, 29, 84, 0.8)';
+                pingText.textContent = `- ms`;
+                logNetMessage(`خطأ في الاتصال: ${err.message}`, 'error');
+            }
+
+            // Verify individual tables
+            const tables = [
+                { name: 'adsense_config', label: 'إعدادات الإعلانات', textId: 'tbl-adsense-rows', statusId: 'tbl-adsense-status' },
+                { name: 'posts', label: 'المقالات', textId: 'tbl-posts-rows', statusId: 'tbl-posts-status' },
+                { name: 'messages', label: 'الرسائل الواردة', textId: 'tbl-messages-rows', statusId: 'tbl-messages-status' },
+                { name: 'comments', label: 'التعليقات', textId: 'tbl-comments-rows', statusId: 'tbl-comments-status' }
+            ];
+
+            for (const table of tables) {
+                const textElem = document.getElementById(table.textId);
+                const statusElem = document.getElementById(table.statusId);
+                if (!textElem || !statusElem) continue;
+
+                try {
+                    const res = await fetch(`${supabaseUrl}/rest/v1/${table.name}?select=id`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': supabaseKey,
+                            'Authorization': `Bearer ${supabaseKey}`,
+                            'Prefer': 'count=exact'
+                        }
+                    });
+                    
+                    if (res.ok) {
+                        const contentRange = res.headers.get('content-range') || '';
+                        const count = contentRange.split('/').pop() || '0';
+                        textElem.textContent = `صفوف: ${count}`;
+                        statusElem.textContent = '✅';
+                        statusElem.style.color = 'var(--success)';
+                        logNetMessage(`الجدول [${table.label}]: نشط ويحتوي على ${count} من الصفوف.`, 'success');
+                    } else {
+                        textElem.textContent = 'غير متوفر';
+                        statusElem.textContent = '❌';
+                        statusElem.style.color = 'var(--error)';
+                        logNetMessage(`الجدول [${table.label}]: فشل الفحص (رمز الخطأ: ${res.status})`, 'warning');
+                    }
+                } catch (e) {
+                    textElem.textContent = 'خطأ';
+                    statusElem.textContent = '❌';
+                    statusElem.style.color = 'var(--error)';
+                    logNetMessage(`الجدول [${table.label}]: تعذر الوصول (${e.message})`, 'error');
+                }
+            }
+        }
+
+        // Setup auto checking interval
+        setInterval(() => {
+            const autoCheck = document.getElementById('auto-ping-check');
+            const isTabActive = document.getElementById('network-tab').classList.contains('active');
+            if (autoCheck && autoCheck.checked && isTabActive) {
+                checkNetworkStatus();
+            }
+        }, 15000);
     </script>
 </body>
 </html>
