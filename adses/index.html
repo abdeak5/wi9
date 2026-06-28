@@ -666,6 +666,133 @@
                 line-height: 1.8;
             }
 
+            /* Pill-shaped navigation chips on mobile */
+            .tab-btn {
+                background: rgba(255, 255, 255, 0.04) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 30px !important;
+                padding: 6px 14px !important;
+                font-size: 12.5px !important;
+                color: var(--text-muted) !important;
+                margin-bottom: 5px;
+            }
+            .tab-btn.active {
+                background: var(--accent-orange) !important;
+                border-color: var(--accent-orange) !important;
+                color: var(--text-light) !important;
+            }
+            .tab-btn.active::after {
+                display: none !important;
+            }
+
+            /* Responsive tables to card layout under 600px */
+            @media (max-width: 600px) {
+                #posts-list table,
+                #comments-manager-list table {
+                    display: block !important;
+                    min-width: 100% !important;
+                    border: none !important;
+                }
+                #posts-list thead,
+                #comments-manager-list thead {
+                    display: none !important;
+                }
+                #posts-list tbody,
+                #comments-manager-list tbody {
+                    display: block !important;
+                    width: 100% !important;
+                }
+                #posts-list tr,
+                #comments-manager-list tr {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    background: rgba(255, 255, 255, 0.03) !important;
+                    border: 1px solid var(--border-color) !important;
+                    border-radius: 12px !important;
+                    padding: 15px !important;
+                    margin-bottom: 15px !important;
+                    gap: 12px !important;
+                }
+                #posts-list td,
+                #comments-manager-list td {
+                    display: flex !important;
+                    padding: 0 !important;
+                    border: none !important;
+                    text-align: right !important;
+                    align-items: center !important;
+                    justify-content: flex-start !important;
+                    gap: 10px !important;
+                    flex-wrap: wrap !important;
+                    width: 100% !important;
+                    min-height: auto !important;
+                }
+                /* Data label prefixes for post list */
+                #posts-list td:nth-child(1)::before {
+                    content: "الصورة:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #posts-list td:nth-child(2)::before {
+                    content: "العنوان:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #posts-list td:nth-child(3)::before {
+                    content: "التصنيف:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #posts-list td:nth-child(4)::before {
+                    content: "التاريخ:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #posts-list td:nth-child(5) {
+                    border-top: 1px solid var(--border-color) !important;
+                    padding-top: 12px !important;
+                    margin-top: 5px !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                }
+
+                /* Data label prefixes for comments list */
+                #comments-manager-list td:nth-child(1)::before {
+                    content: "الكاتب:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #comments-manager-list td:nth-child(2)::before {
+                    content: "التعليق:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #comments-manager-list td:nth-child(3)::before {
+                    content: "المقال:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #comments-manager-list td:nth-child(4)::before {
+                    content: "التاريخ:";
+                    font-weight: bold;
+                    color: var(--accent-orange);
+                    min-width: 80px;
+                }
+                #comments-manager-list td:nth-child(5) {
+                    border-top: 1px solid var(--border-color) !important;
+                    padding-top: 12px !important;
+                    margin-top: 5px !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                }
+            }
+
             /* Responsive tables */
             .table-responsive {
                 width: 100%;
