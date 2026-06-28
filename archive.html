@@ -3096,6 +3096,18 @@
         const CACHE_TIME_KEY = 'wiqayah_posts_cache_time';
         const REFRESH_INTERVAL = 30 * 1000; // 30 seconds - posts appear almost instantly
 
+        // Helper to get high-res Blogger image
+        function getHighResImage(url) {
+            if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
+            if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
+                if (url.includes('=')) {
+                    return url.split('=')[0] + '=s1600';
+                }
+                return url.replace(/\/([sw][0-9]+[^/]*)\//, '/s1600/');
+            }
+            return url;
+        }
+
         let allPosts = [];
         let filteredPosts = [];
 
@@ -3298,17 +3310,6 @@
                         const rawId = entry.id ? entry.id['$t'] : '';
                         const postId = rawId.split('.post-')[1] || rawId.split('/').pop() || Math.random().toString(36).substr(2, 9);
 
-                        // Helper to get high-res Blogger image
-                        function getHighResImage(url) {
-                            if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
-                            if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
-                                if (url.includes('=')) {
-                                    return url.split('=')[0] + '=s800';
-                                }
-                                return url.replace(/\/s[0-9]+(-[chw])?\//, '/s800/').replace(/\/w[0-9]+-h[0-9]+[^\/]*\//, '/s800/');
-                            }
-                            return url;
-                        }
 
                         // Extract image from content
                         let image = '';
@@ -3507,7 +3508,7 @@
                         <span>${readTime} دقائق قراءة</span>
                     </div>
                     <article class="timeline-card">
-                        <img src="${post.image}" alt="${post.title}" class="timeline-card-img" loading="lazy">
+                        <img src="${getHighResImage(post.image)}" alt="${post.title}" class="timeline-card-img" loading="lazy">
                         <div class="timeline-card-content">
                             <div>
                                 <h3 class="timeline-card-title">

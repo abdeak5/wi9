@@ -3555,6 +3555,18 @@
         const CACHE_TIME_KEY = 'wiqayah_posts_cache_time';
         const REFRESH_INTERVAL = 30 * 1000; // 30 seconds - posts appear almost instantly
 
+        // Helper to get high-res Blogger image
+        function getHighResImage(url) {
+            if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
+            if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
+                if (url.includes('=')) {
+                    return url.split('=')[0] + '=s1600';
+                }
+                return url.replace(/\/([sw][0-9]+[^/]*)\//, '/s1600/');
+            }
+            return url;
+        }
+
         let allPosts = [];
         let activeCategory = 'الرئيسية';
         let currentSlide = 0;
@@ -3815,17 +3827,6 @@
                         const rawId = entry.id ? entry.id['$t'] : '';
                         const postId = rawId.split('.post-')[1] || rawId.split('/').pop() || Math.random().toString(36).substr(2, 9);
 
-                        // Helper to get high-res Blogger image
-                        function getHighResImage(url) {
-                            if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
-                            if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
-                                if (url.includes('=')) {
-                                    return url.split('=')[0] + '=s800';
-                                }
-                                return url.replace(/\/s[0-9]+(-[chw])?\//, '/s800/').replace(/\/w[0-9]+-h[0-9]+[^\/]*\//, '/s800/');
-                            }
-                            return url;
-                        }
 
                         // Extract image from content
                         let image = '';
@@ -3980,7 +3981,7 @@
                 const dateStr = formatDate(post.publishDate);
                 const readTime = calculateReadTime(post.content);
                 const firstCat = post.categories[0] || 'Ø¹Ø§Ù…';
-                const imgSrc = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
 
                 html += '<article class="post-card" onclick="window.location.hash=\'post/' + post.id + '\'">' +
                     '<div class="post-img-wrapper">' +
@@ -4054,7 +4055,7 @@
                 const categoriesHtml = post.categories.map(function(cat) {
                     return '<span class="post-category-badge" style="position:static; display:inline-block; margin-left:5px;">' + cat + '</span>';
                 }).join('');
-                const imgSrc = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
 
                 // Helper to insert middle ad in post content
                 function insertMiddleAd(content) {
@@ -4080,6 +4081,46 @@
                     .replace(/color:\s*#d1d8e0/gi, 'color: var(--text-dark)')
                     .replace(/color:\s*var\(--text-light\)/gi, 'color: var(--text-dark)')
                     .replace(/color:\s*rgb\(209,\s*216,\s*224\)/gi, 'color: var(--text-dark)');
+
+                // Dynamically strip the first duplicate image at render-time for Blogger posts
+                if (post.originalLink && post.originalLink !== '#') {
+                    try {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = cleanContent;
+                        const firstImg = tempDiv.querySelector('img');
+                        if (firstImg) {
+                            let elementToRemove = firstImg;
+                            let parent = firstImg.parentElement;
+                            if (parent && parent.tagName === 'A') {
+                                elementToRemove = parent;
+                                parent = parent.parentElement;
+                            }
+                            if (parent && (parent.classList.contains('separator') || parent.style.textAlign === 'center' || parent.style.clear === 'both')) {
+                                elementToRemove = parent;
+                                parent = parent.parentElement;
+                            }
+                            if (parent && (parent.tagName === 'TD' || parent.tagName === 'TR' || parent.tagName === 'TBODY' || parent.tagName === 'TABLE')) {
+                                let table = parent;
+                                while (table && table.tagName !== 'TABLE') {
+                                    table = table.parentElement;
+                                }
+                                if (table) {
+                                    const imgCount = table.querySelectorAll('img').length;
+                                    const textLen = table.textContent.trim().length;
+                                    if (imgCount === 1 && textLen < 50) {
+                                        elementToRemove = table;
+                                    }
+                                }
+                            }
+                            if (elementToRemove && elementToRemove.parentNode) {
+                                elementToRemove.parentNode.removeChild(elementToRemove);
+                            }
+                            cleanContent = tempDiv.innerHTML;
+                        }
+                    } catch (err) {
+                        console.error('Error stripping image in showSinglePost:', err);
+                    }
+                }
 
                 const processedContent = insertMiddleAd(cleanContent);
 
@@ -4546,7 +4587,7 @@
                         const dateStr = formatDate(post.publishDate);
                         const readTime = calculateReadTime(post.content);
                         const firstCat = post.categories[0] || 'عام';
-                        const imgSrc = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                        const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
 
                         html += '<article class="post-card" onclick="window.location.hash=\'post/' + post.id + '\'">' +
                             '<div class="post-img-wrapper">' +
@@ -4678,7 +4719,7 @@
             footer.style.fontSize = '10px';
             footer.style.color = '#777';
             footer.innerHTML = `
-                <p>تم تحميل هذا المقال من موقع وقاية برو (wiqayah.pro) &copy; 2026. جميع الحقوق محفوظة.</p>
+                <p>تم تحميل هذا المقال من موقع وقاية برو (wi9ayah.pro) &copy; 2026. جميع الحقوق محفوظة.</p>
             `;
             pdfContainer.appendChild(footer);
 
