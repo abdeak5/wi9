@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبات السلامة الهندسية | وقاية برو</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://files.catbox.moe/ub1za9.png" />
+    <link rel="shortcut icon" type="image/png" href="https://files.catbox.moe/ub1za9.png" />
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset & Variables */
+        :root {
+            --primary-dark: #0d1e3d;
+            --primary-dark-rgb: 13, 30, 61;
+            --accent-orange: #f39c12;
+            --accent-orange-hover: #e67e22;
+            --bg-light: #f4f6f9;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            direction: rtl;
+            text-align: right;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all var(--transition-speed) ease;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f2f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-dark);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-orange);
+        }
+
+        /* ==================== TOP BAR ==================== */
+        .top-bar {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            font-size: 13px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .top-bar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-socials {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-bar-socials .social-link {
+            color: var(--white);
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .top-bar-socials .social-link:hover {
+            color: var(--accent-orange);
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            opacity: 1;
+        }
+
+        .top-bar-socials .social-link svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .top-bar-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .top-bar-link {
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .top-bar-link:hover {
+            color: var(--accent-orange);
+            transform: translateY(-1px);
+        }
+
+        /* ==================== NAVBAR ==================== */
+        .main-nav {
+            background-color: var(--primary-dark);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-emblem {
+            height: 50px;
+            width: auto;
+        }
+
+        .logo-title {
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-title span {
+            color: var(--accent-orange);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+            font-size: 15px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--accent-orange);
+        }
+
+        /* Dropdown logic */
+        .nav-item-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--primary-dark);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 0;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .nav-item-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            display: block;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all var(--transition-speed) ease;
+            text-align: right;
+        }
+
+        .dropdown-link:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+            color: var(--accent-orange);
+            padding-right: 25px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-toggle, .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.03);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-toggle:hover, .menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--accent-orange);
+        }
+
+        .search-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background-color: currentColor;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* ==================== PAGE HEADER ==================== */
+        .page-header {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(13, 30, 61, 0.6) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(243, 156, 18, 0.08) 0%, transparent 40%);
+            border-bottom: 5px solid var(--accent-orange);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--white);
+            line-height: 1.3;
+        }
+
+        .page-title span {
+            color: var(--accent-orange);
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            line-height: 1.8;
+        }
+
+        /* ==================== CALCULATOR SECTION ==================== */
+        .calculator-container {
+            margin: -40px auto 60px;
+            max-width: 1100px;
+            width: 100%;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .calc-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .calc-tab-btn {
+            background: var(--primary-dark);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px 28px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .calc-tab-btn:hover {
+            color: var(--accent-orange);
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .calc-tab-btn.active {
+            background: var(--accent-orange);
+            color: var(--white);
+            border-color: var(--accent-orange);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.35);
+        }
+
+        .calc-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 40px;
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .calc-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+        }
+
+        .calc-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .calc-results {
+            background: #0d1e3d;
+            border-radius: 16px;
+            padding: 30px;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .calc-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 10px;
+        }
+
+        .calc-results-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .input-label span {
+            color: var(--accent-orange);
+            font-weight: 800;
+        }
+
+        /* Beautiful Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            transition: background 450ms ease-in;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--accent-orange-hover);
+        }
+
+        select, input[type="number"] {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+            background: #fff;
+        }
+
+        /* Metrics outputs */
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .result-label {
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .result-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--white);
+        }
+
+        .result-val.highlight {
+            color: var(--accent-orange);
+            font-size: 20px;
+        }
+
+        .recommendations-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(243, 156, 18, 0.05);
+            border: 1px dashed rgba(243, 156, 18, 0.3);
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .recommendations-box strong {
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13.5px;
+        }
+
+        .report-btn {
+            background: var(--accent-orange);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .report-btn:hover {
+            background: var(--accent-orange-hover);
+            box-shadow: 0 4px 15px rgba(243,156,18,0.3);
+        }
+
+        /* ==================== FOOTER ==================== */
+        .main-footer {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            padding: 50px 0 20px;
+            font-size: 13px;
+            border-top: 5px solid var(--accent-orange);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.8fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col-about {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .footer-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-logo-emblem {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .footer-logo-title {
+            color: var(--white);
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .footer-logo-title span {
+            color: var(--accent-orange);
+        }
+
+        .footer-about-text {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            font-size: 13px;
+        }
+
+        .footer-col-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .footer-col-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 35px;
+            height: 2px;
+            background-color: var(--accent-orange);
+        }
+
+        .footer-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-menu-link {
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .footer-menu-link:hover {
+            color: var(--accent-orange);
+            padding-right: 5px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .footer-copyright {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+        }
+
+        .footer-copyright span {
+            color: var(--accent-orange);
+            font-weight: 700;
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .btn {
+            background-color: var(--accent-orange);
+            color: var(--white);
+            border: none;
+            padding: 8px 18px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-orange-hover);
+        }
+
+        /* ==================== SEARCH OVERLAY ==================== */
+        #search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(13, 30, 61, 0.98);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+        }
+
+        #search-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-overlay-close {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 35px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .search-overlay-close:hover {
+            transform: rotate(90deg);
+            color: var(--accent-orange);
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: none;
+            border: none;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 50px 15px 15px;
+            font-size: 22px;
+            font-family: 'Cairo', sans-serif;
+            color: var(--white);
+            outline: none;
+            text-align: right;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-orange);
+        }
+
+        .search-icon-btn {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .popular-searches {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .popular-search-tag {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .popular-search-tag:hover {
+            background-color: var(--accent-orange);
+            color: var(--white);
+        }
+
+        /* ==================== RESPONSIVE LAYOUTS ==================== */
+        @media (max-width: 991px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                right: -100%;
+                width: 280px;
+                height: calc(100vh - 80px);
+                background-color: var(--primary-dark);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 30px 20px;
+                gap: 15px;
+                transition: right 0.4s ease;
+                box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.2);
+                overflow-y: auto;
+            }
+            .nav-menu.active {
+                right: 0;
+            }
+            .dropdown-menu {
+                position: static;
+                transform: none;
+                opacity: 1;
+                visibility: visible;
+                box-shadow: none;
+                background-color: rgba(255,255,255,0.02);
+                margin-top: 5px;
+            }
+            .nav-item-dropdown:hover .dropdown-menu {
+                transform: none;
+            }
+            .page-title {
+                font-size: 28px;
+            }
+            .calc-card {
+                padding: 25px 20px;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+            .footer-logo-area {
+                justify-content: center;
+            }
+            .footer-col-title::after {
+                right: 50%;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== TOP BAR ==================== -->
+    <header class="top-bar">
+        <div class="container">
+            <div class="top-bar-links">
+                <a href="mailto:info@wi9ayah.pro" class="top-bar-link" id="contact-email-link">info@wi9ayah.pro</a>
+                <span style="opacity: 0.3; color:#fff;">|</span>
+                <span class="top-bar-link" id="contact-phone-link">+966 50 123 4567</span>
+            </div>
+            <div class="top-bar-socials">
+                <a href="#" class="social-link" id="social-whatsapp" target="_blank" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.335 4.963L2 22l5.233-1.371a9.936 9.936 0 0 0 4.779 1.218h.004c5.506 0 9.989-4.478 9.99-9.984a9.965 9.965 0 0 0-2.924-7.064A9.92 9.92 0 0 0 12.012 2zm5.776 14.281c-.318.895-1.554 1.637-2.14 1.701-.58.064-1.258.118-3.793-.889-3.242-1.288-5.328-4.577-5.489-4.792-.162-.215-1.312-1.745-1.312-3.328 0-1.583.829-2.362 1.122-2.67.293-.307.636-.385.849-.385.213 0 .426.002.61.01.196.008.462-.074.723.57.266.65.912 2.215.992 2.378.08.163.134.354.027.57-.107.215-.162.349-.319.53-.157.181-.33.404-.472.542-.158.154-.323.322-.139.636.184.313.817 1.349 1.751 2.183.934.834 1.724 1.09 1.968 1.205.244.115.385.097.53-.064.143-.162.61-.71.774-.954.162-.244.325-.205.549-.122.224.083 1.42.67 1.664.792.244.122.406.183.467.287.06.104.06.602-.258 1.497z"/></svg>
+                </a>
+                <a href="#" class="social-link" id="social-telegram" target="_blank" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.74 7.57-3.27 3.6-1.5 4.35-1.76 4.84-1.77.11 0 .35.03.5.16.13.12.17.28.18.39.01.1.02.25.01.36z"/></svg>
+                </a>
+                <a href="#" class="social-link" id="social-instagram" target="_blank" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                </a>
+                <a href="#" class="social-link" id="social-tiktok" target="_blank" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31.02 2.61.37 3.75 1.02.1.06.1.22 0 .28a8.31 8.31 0 0 1-5.11 1.42 1.1 1.1 0 0 1-1.07-1.1v-1.5c0-.07.05-.12.13-.12zM9.515 2.1c1.31.02 2.61.37 3.75 1.02.1.06.1.22 0 .28a8.31 8.31 0 0 1-5.11 1.42 1.1 1.1 0 0 1-1.07-1.1v-1.5c0-.07.05-.12.13-.12z M12.525 6c2.53-.02 4.88-1.28 6.32-3.33a.15.15 0 0 1 .24.03c.87 1.55 2.27 2.76 3.93 3.42a.15.15 0 0 0 .2-.14V4.34a.15.15 0 0 0-.08-.13 9.77 9.77 0 0 1-5.26-4.14.15.15 0 0 0-.25-.01 9.8 9.8 0 0 1-5.1 3.93.15.15 0 0 0-.11.14v2.01c0 .08.06.15.14.16z"/></svg>
+                </a>
+                <a href="#" class="social-link" id="social-linkedin" target="_blank" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="index.html" class="logo-area">
+                    <img src="https://files.catbox.moe/ub1za9.png" alt="WIQAYAH PRO Logo" class="logo-emblem">
+                    <div class="logo-title">WIQAYAH <span>PRO</span></div>
+                </a>
+                
+                <div class="nav-menu" id="nav-menu">
+                    <!-- Dynamic Menu Links Loaded here -->
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="search-toggle" id="search-toggle" aria-label="بحث">
+                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </button>
+                    <button class="menu-toggle" id="menu-toggle" aria-label="القائمة">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== PAGE HEADER ==================== -->
+    <div class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <h1 class="page-title">حاسبات <span>السلامة الهندسية</span></h1>
+                <p class="page-subtitle">أدوات تفاعلية متطورة لحساب متطلبات الحماية من الحريق وأنظمة السلامة المهنية ومخارج الطوارئ متوافقة مع الأكواد الهندسية العالمية والمحلية.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CALCULATOR SECTION ==================== -->
+    <div class="calculator-container">
+        
+        <div class="calc-tabs">
+            <button class="calc-tab-btn active" onclick="switchCalc('extinguisher')">🧯 حاسبة طفايات الحريق</button>
+            <button class="calc-tab-btn" onclick="switchCalc('watertank')">🛢️ حاسبة خزان مياه الحريق</button>
+            <button class="calc-tab-btn" onclick="switchCalc('emergency')">🚪 حاسبة أبواب الطوارئ</button>
+        </div>
+
+        <!-- CALCULATOR 1: FIRE EXTINGUISHERS -->
+        <div id="extinguisher-calc" class="calc-card active">
+            <div class="calc-title">🧯 حاسبة توزيع وعدد طفايات الحريق (طبقاً لـ NFPA 10)</div>
+            <div class="calc-grid">
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>مساحة المبنى الإجمالية:</span>
+                            <span id="ext-area-val">500 م²</span>
+                        </div>
+                        <input type="range" id="ext-area" min="20" max="8000" step="10" value="500" oninput="calculateExtinguisher()">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">تصنيف درجة الخطورة للمبنى:</div>
+                        <select id="ext-hazard" onchange="calculateExtinguisher()">
+                            <option value="low">خطورة خفيفة (مكاتب، مدارس، مساجد)</option>
+                            <option value="medium" selected>خطورة متوسطة (مستودعات خفيفة، معارض، جراجات)</option>
+                            <option value="high">خطورة عالية (مصانع، ورش نجارة، مستودعات كرتون)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="calc-results" id="ext-results-print">
+                    <div class="calc-results-header">
+                        <span>النتائج الحسابية التقريبية</span>
+                        <span style="font-size:12px; opacity:0.7;">NFPA 10</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">الحد الأدنى لطفايات الحريق المطلوبة:</div>
+                        <div class="result-val highlight" id="ext-total-count">5 طفايات</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">الدرجة المقترحة للطفائية (Rating):</div>
+                        <div class="result-val" id="ext-rating-val">3-A / 10-B</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">أقصى مسافة سير للطفائية:</div>
+                        <div class="result-val" id="ext-distance-val">22.9 متر (75 قدم)</div>
+                    </div>
+
+                    <div class="recommendations-box">
+                        <strong>💡 التوصيات المقترحة للموقع:</strong>
+                        <span id="ext-recommendation">ينصح بتوزيع الطفايات في الممرات وبجوار مخارج الطوارئ وغرف الكهرباء، بحيث لا تتجاوز مسافة السير للوصول للطفائية الحدود المذكورة أعلاه. يفضل استخدام طفايات بودرة جافة ABC لعموم المبنى، مع إضافة طفايات CO2 لغرف الكهرباء والخوادم.</span>
+                    </div>
+                    
+                    <button class="report-btn" onclick="printReport('ext-results-print', 'تقرير حسابات طفايات الحريق')">🖨️ طباعة تقرير الحسابات</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALCULATOR 2: FIRE WATER TANK -->
+        <div id="watertank-calc" class="calc-card">
+            <div class="calc-title">🛢️ حاسبة سعة خزان مياه مكافحة الحريق (طبقاً لـ NFPA 13/22)</div>
+            <div class="calc-grid">
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>المساحة المحمية بالمرشات (Sprinkler Area):</span>
+                            <span id="tank-area-val">1000 م²</span>
+                        </div>
+                        <input type="range" id="tank-area" min="50" max="6000" step="50" value="1000" oninput="calculateWaterTank()">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label">درجة خطورة إشغال المبنى:</div>
+                        <select id="tank-hazard" onchange="calculateWaterTank()">
+                            <option value="light">خطورة خفيفة (مستشفيات، مكاتب، فنادق)</option>
+                            <option value="ordinary" selected>خطورة عادية (صناعات خفيفة، مستودعات تجارية)</option>
+                            <option value="extra">خطورة عالية (صناعات كيميائية، تكرير، سوائل قابلة للاشتعال)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label">مدة التشغيل المطلوبة للمياه:</div>
+                        <select id="tank-duration" onchange="calculateWaterTank()">
+                            <option value="30">30 دقيقة (إشغال خفيف خاضع للاشتراطات)</option>
+                            <option value="60" selected>60 دقيقة (إشغال خطورة عادية افتراضي)</option>
+                            <option value="90">90 دقيقة (إشغال خطورة عالية خفيف)</option>
+                            <option value="120">120 دقيقة (إشغال خطورة عالية جداً)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="calc-results" id="tank-results-print">
+                    <div class="calc-results-header">
+                        <span>النتائج الحسابية التقريبية</span>
+                        <span style="font-size:12px; opacity:0.7;">NFPA 13 & 22</span>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">سعة خزان المياه المطلوبة:</div>
+                        <div class="result-val highlight" id="tank-volume-val">90,000 لتر (90 م³)</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">معدل التدفق الإجمالي للمضخة:</div>
+                        <div class="result-val" id="tank-flow-val">1500 LPM (400 GPM)</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">معدل التدفق للخراطيم اليدوية المضافة:</div>
+                        <div class="result-val" id="tank-hose-val">946 LPM (250 GPM)</div>
+                    </div>
+
+                    <div class="recommendations-box">
+                        <strong>💡 التوصيات المقترحة للموقع:</strong>
+                        <span id="tank-recommendation">يجب بناء الخزان بخرسانة معزولة مانعة للتسريب أو استخدام خزانات فيبر جلاس معتمدة. القدرة المقترحة لمضخة الحريق الرئيسية يجب أن تغطي التدفق المذكور أعلاه بضغط لا يقل عن 7 بار كمتوسط للمباني العادية.</span>
+                    </div>
+
+                    <button class="report-btn" onclick="printReport('tank-results-print', 'تقرير حساب خزان مياه الحريق')">🖨️ طباعة تقرير الحسابات</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALCULATOR 3: EMERGENCY EXITS -->
+        <div id="emergency-calc" class="calc-card">
+            <div class="calc-title">🚪 حاسبة أبواب ومخارج الطوارئ وعرض الإخلاء (طبقاً لـ NFPA 101)</div>
+            <div class="calc-grid">
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>الحمل الإجمالي للشاغلين (Occupant Load):</span>
+                            <span id="exit-people-val">300 شخص</span>
+                        </div>
+                        <input type="range" id="exit-people" min="10" max="4000" step="10" value="300" oninput="calculateExits()">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label">طبيعة مسار الإخلاء المتاح:</div>
+                        <select id="exit-type" onchange="calculateExits()">
+                            <option value="level" selected>مسار مستوٍ (أبواب، ممرات طوارئ أفقية)</option>
+                            <option value="stairs">مسار رأسي (سلالم طوارئ، أدراج)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="calc-results" id="exit-results-print">
+                    <div class="calc-results-header">
+                        <span>النتائج الحسابية التقريبية</span>
+                        <span style="font-size:12px; opacity:0.7;">NFPA 101</span>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">الحد الأدنى لعدد مخارج الطوارئ:</div>
+                        <div class="result-val highlight" id="exit-count-val">مخرجان (2 Exits)</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">العرض الإجمالي المطلوب لجميع الأبواب:</div>
+                        <div class="result-val" id="exit-width-val">150 سم (1.5 متر)</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">التوزيع المقترح للأبواب:</div>
+                        <div class="result-val" id="exit-suggested-val">بابان بعرض 90 سم لكل منهما</div>
+                    </div>
+
+                    <div class="recommendations-box">
+                        <strong>💡 التوصيات المقترحة للموقع:</strong>
+                        <span id="exit-recommendation">يجب توزيع مخارج الطوارئ بحيث تكون متباعدة بمسافة لا تقل عن نصف القطر الأكبر للصالة/المبنى لضمان عدم غلق المخرجين بحدث واحد. يجب تزويد الأبواب بمقابض هلع (Panic Bars) وتفتح في اتجاه الهروب للخارج.</span>
+                    </div>
+
+                    <button class="report-btn" onclick="printReport('exit-results-print', 'تقرير حساب أبواب ومخارج الطوارئ')">🖨️ طباعة تقرير الحسابات</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Column 1: About -->
+                <div class="footer-col-about">
+                    <div class="footer-logo-area">
+                        <img src="https://files.catbox.moe/ub1za9.png" alt="WIQAYAH PRO Logo" class="footer-logo-emblem">
+                        <div class="footer-logo-title">WIQAYAH <span>PRO</span></div>
+                    </div>
+                    <p class="footer-about-text">
+                        منصة وقاية برو هي مرجعك الهندسي والمهني الأول للحماية من الحرائق واشتراطات السلامة المهنية، نهدف لتقديم محتوى عالي الجودة متوافق مع الأكواد العالمية والمحلية.
+                    </p>
+                </div>
+                <!-- Column 2: Links -->
+                <div class="footer-col-links">
+                    <div class="footer-col-title">روابط سريعة</div>
+                    <div class="footer-menu">
+                        <a href="index.html" class="footer-menu-link">الرئيسية</a>
+                        <a href="about.html" class="footer-menu-link">عن المنصة</a>
+                        <a href="contact.html" class="footer-menu-link">اتصل بنا</a>
+                        <a href="nfpa.html" class="footer-menu-link">دليل معايير NFPA</a>
+                        <a href="faq.html" class="footer-menu-link">الأسئلة الشائعة</a>
+                    </div>
+                </div>
+                <!-- Column 3: Legal -->
+                <div class="footer-col-legal">
+                    <div class="footer-col-title">شروط وسياسات</div>
+                    <div class="footer-menu">
+                        <a href="privacy.html" class="footer-menu-link">سياسة الخصوصية</a>
+                        <a href="terms.html" class="footer-menu-link">اتفاقية الاستخدام</a>
+                    </div>
+                </div>
+                <!-- Column 4: Newsletter -->
+                <div class="footer-col-newsletter">
+                    <div class="footer-col-title">النشرة الإخبارية</div>
+                    <p class="footer-about-text" style="margin-bottom: 15px;">اشترك معنا لتصلك أحدث المقالات وتنبيهات الأكواد الهندسية للسلامة.</p>
+                    <form id="footer-subscribe-form" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="email" id="subscriber-email" placeholder="البريد الإلكتروني..." required style="flex-grow: 1; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; min-width: 150px;">
+                        <button type="submit" class="btn" style="padding: 10px 18px; border-radius: 8px; font-size: 13px; cursor: pointer;">اشترك</button>
+                    </form>
+                    <p id="subscription-status" style="font-size: 12px; margin-top: 8px; display: none; line-height: 1.6;"></p>
+                </div>
+            </div>
+            <!-- Bottom Copyright bar -->
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>© 2026 جميع الحقوق محفوظة لـ <span>WIQAYAH PRO</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== SEARCH OVERLAY ==================== -->
+    <div id="search-overlay">
+        <button class="search-overlay-close" id="search-overlay-close" aria-label="إغلاق">×</button>
+        <div class="search-container">
+            <form id="search-form">
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" id="search-input" placeholder="اكتب للبحث في المقالات..." autocomplete="off">
+                    <button type="submit" class="search-icon-btn" aria-label="بحث">
+                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </button>
+                </div>
+            </form>
+            <div id="search-results" class="search-results-list" style="max-height: 300px; overflow-y: auto; display: none; margin-top: 20px;">
+                <!-- Results will be injected here -->
+            </div>
+            <div class="popular-searches">
+                <span style="color: rgba(255,255,255,0.4); font-size:13px; font-weight:600; display:block; margin-bottom:10px;">عمليات بحث شائعة:</span>
+                <span class="popular-search-tag">NFPA 13</span>
+                <span class="popular-search-tag">طفاية الحريق</span>
+                <span class="popular-search-tag">مخارج الطوارئ</span>
+                <span class="popular-search-tag">إنذار الحريق</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        const supabaseUrl = 'https://hcoafdfhpizcgbbkcois.supabase.co';
+        const supabaseKey = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+        // Global Configurations
+        window.adConfig = {
+            enabled: true,
+            client: 'ca-pub-1234567890123456',
+            slots: { sidebar: '', top: '', middle: '', bottom: '', inner_footer: '' },
+            socials: { whatsapp: '#', telegram: '#', instagram: '#', tiktok: '#', linkedin: '#' }
+        };
+
+        // Switch Calculator Tabs
+        function switchCalc(calcType) {
+            document.querySelectorAll('.calc-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.calc-card').forEach(card => card.classList.remove('active'));
+            
+            if (calcType === 'extinguisher') {
+                event.target.classList.add('active');
+                document.getElementById('extinguisher-calc').classList.add('active');
+                calculateExtinguisher();
+            } else if (calcType === 'watertank') {
+                event.target.classList.add('active');
+                document.getElementById('watertank-calc').classList.add('active');
+                calculateWaterTank();
+            } else if (calcType === 'emergency') {
+                event.target.classList.add('active');
+                document.getElementById('emergency-calc').classList.add('active');
+                calculateExits();
+            }
+        }
+
+        // Calculator 1: Extinguisher Calculations
+        function calculateExtinguisher() {
+            const area = parseInt(document.getElementById('ext-area').value);
+            const hazard = document.getElementById('ext-hazard').value;
+            
+            document.getElementById('ext-area-val').innerText = area + ' م²';
+            
+            let areaPerExtinguisher = 120; // Default medium hazard
+            let rating = '3-A / 10-B';
+            let distance = '22.9 متر (75 قدم)';
+            let recText = '';
+            
+            if (hazard === 'low') {
+                areaPerExtinguisher = 200;
+                rating = '2-A / 5-B';
+                distance = '22.9 متر (75 قدم)';
+                recText = 'ينصح بتوزيع طفايات بودرة جافة ABC زنة 6 كجم أو طفايات ماء زنة 9 لتر في الممرات. الخطورة الخفيفة تشمل مباني المكاتب الإدارية، المدارس، والمساجد. أقصى مسافة سير للوصول لأقرب طفاية هي 22.9 متر.';
+            } else if (hazard === 'medium') {
+                areaPerExtinguisher = 120;
+                rating = '3-A / 10-B';
+                distance = '22.9 متر (75 قدم) للفئة A و 15.2 متر للفئة B';
+                recText = 'ينصح باستخدام طفايات بودرة جافة ABC زنة 6 كجم كطفايات رئيسية مع توزيع طفايات ثاني أكسيد الكربون CO2 زنة 5 كجم بجوار غرف الكهرباء ولوحات التوزيع. الخطورة المتوسطة تشمل معارض السيارات، جراجات الصيانة، والمستودعات التجارية.';
+            } else if (hazard === 'high') {
+                areaPerExtinguisher = 75;
+                rating = '4-A / 20-B';
+                distance = '22.9 متر (75 قدم) للفئة A و 9.1 متر للفئة B';
+                recText = 'يجب استخدام طفايات بودرة جافة ABC زنة 9 كجم أو طفايات رغوة ذات سعة عالية. مسافات التوزيع تضيق جداً لمنع انتشار الحرائق السريعة. الخطورة العالية تشمل ورش النجارة، مصانع المواد الكيميائية، والمطابخ المركزية الكبيرة.';
+            }
+            
+            const count = Math.ceil(area / areaPerExtinguisher);
+            
+            document.getElementById('ext-total-count').innerText = count + ' طفايات';
+            document.getElementById('ext-rating-val').innerText = rating;
+            document.getElementById('ext-distance-val').innerText = distance;
+            document.getElementById('ext-recommendation').innerText = recText;
+        }
+
+        // Calculator 2: Fire Water Tank Calculations
+        function calculateWaterTank() {
+            const area = parseInt(document.getElementById('tank-area').value);
+            const hazard = document.getElementById('tank-hazard').value;
+            const duration = parseInt(document.getElementById('tank-duration').value);
+            
+            document.getElementById('tank-area-val').innerText = area + ' م²';
+            
+            const areaSqft = area * 10.764;
+            let density = 0.15; // Ordinary hazard default
+            let hoseStream = 250; // GPM default
+            let recText = '';
+            
+            if (hazard === 'light') {
+                density = 0.10;
+                hoseStream = 100;
+                recText = 'طبقاً لـ NFPA 13، تصميم الخطورة الخفيفة يتطلب مرشات بمعدل تدفق 0.1 جالون/دقيقة لكل قدم مربع. القدرة المطلوبة لمضخة الحريق يجب ألا تقل عن 500 GPM (1892 LPM) لتغطية المرشات وخراطيم الإطفاء اليدوية.';
+            } else if (hazard === 'ordinary') {
+                density = 0.15;
+                hoseStream = 250;
+                recText = 'إشغال الخطورة العادية يتطلب كثافة تصميمية 0.15 جالون/دقيقة لكل قدم مربع. القدرة المقترحة للمضخة هي 750 GPM إلى 1000 GPM لتغطية متطلبات الإطفاء التلقائي واليدوي للموقع في نفس الوقت.';
+            } else if (hazard === 'extra') {
+                density = 0.30;
+                hoseStream = 500;
+                recText = 'الخطورة العالية تتطلب كثافة مائية عالية جداً 0.30 جالون/دقيقة لكل قدم مربع. يتوجب توفير مضخة حريق بقدرة لا تقل عن 1000 GPM إلى 1500 GPM. ينصح بتثبيت خزان مياه احتياطي إضافي لتلافي انقطاع التغذية.';
+            }
+            
+            // Assume design area for sprinkler calculation is 1500 sqft (NFPA 13 standard design area)
+            const sprinklerFlow = 1500 * density; 
+            const totalFlowGpm = sprinklerFlow + hoseStream;
+            const totalVolumeGallons = totalFlowGpm * duration;
+            const totalVolumeLiters = totalVolumeGallons * 3.78541;
+            
+            document.getElementById('tank-volume-val').innerText = Math.ceil(totalVolumeLiters).toLocaleString('ar-EG') + ' لتر (' + Math.ceil(totalVolumeLiters / 1000) + ' م³)';
+            document.getElementById('tank-flow-val').innerText = Math.ceil(totalFlowGpm * 3.78541) + ' LPM (' + Math.ceil(totalFlowGpm) + ' GPM)';
+            document.getElementById('tank-hose-val').innerText = Math.ceil(hoseStream * 3.78541) + ' LPM (' + hoseStream + ' GPM)';
+            document.getElementById('tank-recommendation').innerText = recText;
+        }
+
+        // Calculator 3: Emergency Exits
+        function calculateExits() {
+            const people = parseInt(document.getElementById('exit-people').value);
+            const type = document.getElementById('exit-type').value;
+            
+            document.getElementById('exit-people-val').innerText = people + ' شخص';
+            
+            let minExits = 2;
+            if (people > 500 && people <= 1000) {
+                minExits = 3;
+            } else if (people > 1000) {
+                minExits = 4;
+            }
+            
+            let factor = 0.5; // level components default (cm per person)
+            let exitTypeLabel = 'مخارج مستوية (أبواب/ممرات)';
+            
+            if (type === 'stairs') {
+                factor = 0.76; // stairways (cm per person)
+                exitTypeLabel = 'أدراج/سلالم هروب';
+            }
+            
+            const totalWidthCm = people * factor;
+            const doorWidth = 90; // Standard single door width leaf in cm
+            const requiredDoorsCount = Math.ceil(totalWidthCm / doorWidth);
+            
+            document.getElementById('exit-count-val').innerText = minExits + ' مخارج طوارئ';
+            document.getElementById('exit-width-val').innerText = Math.ceil(totalWidthCm) + ' سم (' + (totalWidthCm / 100).toFixed(2) + ' متر)';
+            document.getElementById('exit-suggested-val').innerText = `${requiredDoorsCount} أبواب هروب بعرض ${doorWidth} سم للباب`;
+            
+            let recText = `يجب ألا تقل المسافة الفاصلة بين مخارج الطوارئ عن نصف طول القطر الكلي للمبنى. يجب تزويد الأبواب بمقابض هلع تفتح بالضغط للخارج. كما يجب تركيب إشارات إرشادية مضيئة (Exit Signs) ومجهزة ببطاريات طوارئ تدوم 90 دقيقة على الأقل.`;
+            document.getElementById('exit-recommendation').innerText = recText;
+        }
+
+        // Print Calculation Report function
+        function printReport(divId, title) {
+            const printContent = document.getElementById(divId).innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            // Build temporary styled printable window
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: 'Cairo', sans-serif; padding: 40px; background: #fff; color: #333; direction: rtl; text-align: right; }
+                        h1 { color: #0d1e3d; border-bottom: 3px solid #f39c12; padding-bottom: 10px; font-size: 24px; }
+                        .result-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 12px 0; font-size: 15px; }
+                        .result-label { font-weight: bold; }
+                        .result-val { color: #f39c12; font-weight: bold; font-size: 16px; }
+                        .recommendations-box { margin-top: 30px; padding: 20px; border: 1px dashed #f39c12; background: #fffaf0; border-radius: 8px; font-size: 14px; }
+                        .recommendations-box strong { color: #0d1e3d; display: block; margin-bottom: 8px; }
+                        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #777; border-top: 1px solid #ccc; padding-top: 15px; }
+                        .report-btn { display:none; }
+                        .calc-results-header { font-size: 18px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <img src="https://files.catbox.moe/ub1za9.png" style="height: 60px; margin-bottom: 10px;">
+                        <h2>منصة وقاية برو للسلامة الهندسية</h2>
+                        <p>${title}</p>
+                    </div>
+                    <h1>${title} - حسابات تخطيطية أولية</h1>
+                    <div>${printContent}</div>
+                    <div class="footer">
+                        تم إنشاء هذا التقرير هندسياً عبر حاسبات منصة وقاية برو (www.wi9ayah.pro). الحسابات تخطيطية ويجب مراجعتها من المهندس الاستشاري المعتمد للمشروع.
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // Initialize Calculators on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateExtinguisher();
+            calculateWaterTank();
+            calculateExits();
+        });
+
+        // Dynamic Header Menu loading
+        function applyHeaderMenu(config) {
+            if (!config || !config.header_menu) {
+                // Fallback default
+                const navMenu = document.querySelector('.nav-menu');
+                if (navMenu) {
+                    navMenu.innerHTML = `
+                        <div class="nav-item"><a href="index.html" class="nav-link">الرئيسية</a></div>
+                        <div class="nav-item"><a href="about.html" class="nav-link">عن المنصة</a></div>
+                        <div class="nav-item"><a href="calculators.html" class="nav-link active">حاسبات السلامة</a></div>
+                        <div class="nav-item"><a href="nfpa.html" class="nav-link">أكواد NFPA</a></div>
+                        <div class="nav-item"><a href="contact.html" class="nav-link">اتصل بنا</a></div>
+                    `;
+                }
+                return;
+            }
+            try {
+                const menuItems = JSON.parse(config.header_menu);
+                if (!Array.isArray(menuItems)) return;
+                
+                const navMenu = document.querySelector('.nav-menu');
+                if (!navMenu) return;
+                
+                let html = '';
+                menuItems.forEach(item => {
+                    // Check if current item is calculators.html to highlight it active
+                    const isCalc = item.url === 'calculators.html';
+                    const activeClass = isCalc ? 'active' : '';
+
+                    if (item.dropdown && Array.isArray(item.dropdown)) {
+                        html += `
+                        <div class="nav-item">
+                            <a href="${item.url || '#'}" class="nav-link ${activeClass}">
+                                ${item.title}
+                                <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; fill: currentColor; margin-right: 5px;"><path d="M7 10l5 5 5-5z"/></svg>
+                            </a>
+                            <div class="dropdown-menu">
+                                ${item.dropdown.map(sub => `<div class="dropdown-item"><a href="${sub.url || '#'}">${sub.title}</a></div>`).join('')}
+                            </div>
+                        </div>`;
+                    } else {
+                        html += `
+                        <div class="nav-item">
+                            <a href="${item.url || '#'}" class="nav-link ${activeClass}">${item.title}</a>
+                        </div>`;
+                    }
+                });
+                
+                navMenu.innerHTML = html;
+
+                // Re-bind click listeners to close mobile menu
+                const navLinks = navMenu.querySelectorAll('a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        const navMenu = document.getElementById('nav-menu');
+                        const menuToggle = document.getElementById('menu-toggle');
+                        if (navMenu && menuToggle) {
+                            navMenu.classList.remove('active');
+                            menuToggle.classList.remove('active');
+                        }
+                    });
+                });
+            } catch(e) {
+                console.error('Error rendering header menu:', e);
+            }
+        }
+
+        // Fetch config from Supabase
+        (function() {
+            // Apply Social links handler
+            function applySocialLinks() {
+                const mappings = [
+                    { id: 'social-whatsapp', key: 'whatsapp', prefix: 'https://wa.me/' },
+                    { id: 'social-telegram', key: 'telegram', prefix: 'https://t.me/' },
+                    { id: 'social-instagram', key: 'instagram', prefix: 'https://instagram.com/' },
+                    { id: 'social-tiktok', key: 'tiktok', prefix: 'https://tiktok.com/@' },
+                    { id: 'social-linkedin', key: 'linkedin', prefix: 'https://linkedin.com/in/' }
+                ];
+                
+                mappings.forEach(item => {
+                    const link = document.getElementById(item.id);
+                    if (link) {
+                        const val = window.adConfig.socials[item.key];
+                        if (!val || val === '#' || val === 'https://wa.me/#' || val === 'https://t.me/#' || val === 'https://instagram.com/#' || val === 'https://tiktok.com/#' || val === 'https://linkedin.com/#') {
+                            link.style.display = 'none';
+                        } else {
+                            link.setAttribute('href', 'redirect.html?platform=' + item.key);
+                            link.style.display = 'inline-flex';
+                        }
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                applySocialLinks();
+                
+                // Handle footer subscription form submission
+                const subscribeForm = document.getElementById('footer-subscribe-form');
+                if (subscribeForm) {
+                    subscribeForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const emailInput = document.getElementById('subscriber-email');
+                        const statusMsg = document.getElementById('subscription-status');
+                        if (!emailInput || !statusMsg) return;
+                        
+                        const email = emailInput.value.trim();
+                        if (!email) return;
+                        
+                        statusMsg.style.display = 'block';
+                        statusMsg.style.color = '#fff';
+                        statusMsg.innerText = 'جاري تسجيل اشتراكك...';
+                        
+                        try {
+                            const checkResponse = await fetch(`${supabaseUrl}/rest/v1/subscriptions?email=eq.${encodeURIComponent(email)}`, {
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey
+                                }
+                            });
+                            const checkData = await checkResponse.json();
+                            if (checkData && checkData.length > 0) {
+                                statusMsg.style.color = 'var(--accent-orange)';
+                                statusMsg.innerText = 'هذا البريد الإلكتروني مشترك بالفعل في النشرة.';
+                                return;
+                            }
+                            
+                            const insertResponse = await fetch(`${supabaseUrl}/rest/v1/subscriptions`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify({ email: email })
+                            });
+                            
+                            if (!insertResponse.ok) throw new Error('Subscription failed');
+                            
+                            statusMsg.style.color = '#2ec4b6';
+                            statusMsg.innerText = 'تم الاشتراك بنجاح! شكراً لثقتك بوقاية برو.';
+                            emailInput.value = '';
+                        } catch (err) {
+                            console.error('Subscription error:', err);
+                            statusMsg.style.color = '#e71d36';
+                            statusMsg.innerText = 'حدث خطأ أثناء الاشتراك. يرجى المحاولة لاحقاً.';
+                        }
+                    });
+                }
+            });
+
+            // Fetch details from Supabase
+            fetch(supabaseUrl + '/rest/v1/adsense_config?id=eq.1&select=*', {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': 'Bearer ' + supabaseKey
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const config = data[0];
+                    window.adConfig.enabled = config.ads_enabled;
+                    window.adConfig.client = config.client_id;
+                    
+                    if (config.social_whatsapp) window.adConfig.socials.whatsapp = config.social_whatsapp;
+                    if (config.social_telegram) window.adConfig.socials.telegram = config.social_telegram;
+                    if (config.social_instagram) window.adConfig.socials.instagram = config.social_instagram;
+                    if (config.social_tiktok) window.adConfig.socials.tiktok = config.social_tiktok;
+                    if (config.social_linkedin) window.adConfig.socials.linkedin = config.social_linkedin;
+
+                    // Apply phone/email
+                    if (config.contact_phone) {
+                        const p = document.getElementById('contact-phone-link');
+                        if (p) p.textContent = config.contact_phone;
+                    }
+                    if (config.contact_email) {
+                        const e = document.getElementById('contact-email-link');
+                        if (e) {
+                            e.textContent = config.contact_email;
+                            e.setAttribute('href', 'mailto:' + config.contact_email);
+                        }
+                    }
+
+                    // Render dynamic header menu
+                    applyHeaderMenu(config);
+                    applySocialLinks();
+                }
+            })
+            .catch(err => {
+                console.warn('Could not load settings from Supabase, using defaults:', err);
+                applyHeaderMenu({});
+            });
+        })();
+
+        // Mobile Menu toggle code
+        const menuToggle = document.getElementById('menu-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        if (menuToggle && navMenu) {
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navMenu.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (!navMenu.contains(e.target) && e.target !== menuToggle) {
+                    navMenu.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+        }
+
+        // Search Overlay toggle code
+        const searchToggle = document.getElementById('search-toggle');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchClose = document.getElementById('search-overlay-close');
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('search-results');
+
+        if (searchToggle && searchOverlay && searchClose) {
+            searchToggle.addEventListener('click', () => {
+                searchOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => searchInput.focus(), 300);
+            });
+            searchClose.addEventListener('click', () => {
+                searchOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        // Live Search implementation inside calculators
+        (function() {
+            let allPosts = [];
+            let isFetching = false;
+
+            async function fetchAllPosts() {
+                if (allPosts.length > 0 || isFetching) return;
+                isFetching = true;
+                try {
+                    const response = await fetch(supabaseUrl + '/rest/v1/posts?select=id,title,categories,image,created_at&order=created_at.desc', {
+                        headers: {
+                            'apikey': supabaseKey,
+                            'Authorization': 'Bearer ' + supabaseKey
+                        }
+                    });
+                    if (response.ok) {
+                        allPosts = await response.json();
+                    }
+                } catch (e) {
+                    console.error('Error loading posts for search:', e);
+                } finally {
+                    isFetching = false;
+                }
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('focus', fetchAllPosts);
+                if (searchToggle) {
+                    searchToggle.addEventListener('click', fetchAllPosts);
+                }
+                
+                document.querySelectorAll('#search-overlay .popular-search-tag').forEach(tag => {
+                    tag.addEventListener('click', () => {
+                        const val = tag.textContent.trim();
+                        searchInput.value = val;
+                        performFilter(val);
+                    });
+                });
+
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    performFilter(searchInput.value.trim());
+                });
+
+                searchInput.addEventListener('input', (e) => {
+                    performFilter(e.target.value.trim());
+                });
+            }
+
+            function performFilter(query) {
+                if (!query) {
+                    resultsContainer.style.display = 'none';
+                    return;
+                }
+                
+                resultsContainer.style.display = 'block';
+                resultsContainer.innerHTML = '<div style="text-align:center; padding: 15px; color:rgba(255,255,255,0.5);">جاري البحث...</div>';
+
+                if (allPosts.length === 0 && !isFetching) {
+                    fetchAllPosts().then(() => doSearch(query));
+                } else {
+                    doSearch(query);
+                }
+            }
+
+            function doSearch(query) {
+                const terms = query.toLowerCase().split(' ');
+                const filtered = allPosts.filter(post => {
+                    const title = post.title.toLowerCase();
+                    const categories = (post.categories || []).join(' ').toLowerCase();
+                    return terms.every(t => title.includes(t) || categories.includes(t));
+                });
+
+                if (filtered.length === 0) {
+                    resultsContainer.innerHTML = '<div class="search-no-results">لا توجد نتائج تطابق بحثك. جرب كلمات أخرى.</div>';
+                    return;
+                }
+
+                resultsContainer.innerHTML = '';
+                filtered.forEach(post => {
+                    const item = document.createElement('a');
+                    item.className = 'search-result-item';
+                    item.setAttribute('href', 'index.html#post/' + post.id);
+                    
+                    item.addEventListener('click', () => {
+                        searchOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+
+                    const imgUrl = post.image || 'https://files.catbox.moe/ru6efb.jpeg';
+                    const category = (post.categories && post.categories.length > 0) ? post.categories[0] : 'عام';
+                    
+                    // Style injected results inline to match search results stylesheet
+                    item.style.display = 'flex';
+                    item.style.alignItems = 'center';
+                    item.style.gap = '15px';
+                    item.style.padding = '12px 15px';
+                    item.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    item.style.textDecoration = 'none';
+                    item.style.transition = 'all 0.3s';
+                    
+                    item.innerHTML = `
+                        <img src="${imgUrl}" style="width: 50px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;" alt="${post.title}">
+                        <div style="flex-grow: 1;">
+                            <div style="font-size: 14px; font-weight: 700; color: #f8f9fa; margin-bottom: 5px; line-height: 1.4; text-align: right;">${post.title}</div>
+                            <div style="font-size: 11px; color: #e05624; font-weight: 600; text-align: right;">${category}</div>
+                        </div>
+                    `;
+                    resultsContainer.appendChild(item);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

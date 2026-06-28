@@ -1024,7 +1024,7 @@
 
         .footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1.8fr;
             gap: 40px;
             margin-bottom: 40px;
         }
@@ -2257,7 +2257,63 @@
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', applySocialLinks);
+            document.addEventListener('DOMContentLoaded', () => {
+                applySocialLinks();
+                
+                // Handle footer subscription form submission
+                const subscribeForm = document.getElementById('footer-subscribe-form');
+                if (subscribeForm) {
+                    subscribeForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const emailInput = document.getElementById('subscriber-email');
+                        const statusMsg = document.getElementById('subscription-status');
+                        if (!emailInput || !statusMsg) return;
+                        
+                        const email = emailInput.value.trim();
+                        if (!email) return;
+                        
+                        statusMsg.style.display = 'block';
+                        statusMsg.style.color = '#fff';
+                        statusMsg.innerText = 'جاري تسجيل اشتراكك...';
+                        
+                        try {
+                            const checkResponse = await fetch(`${supabaseUrl}/rest/v1/subscriptions?email=eq.${encodeURIComponent(email)}`, {
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey
+                                }
+                            });
+                            const checkData = await checkResponse.json();
+                            if (checkData && checkData.length > 0) {
+                                statusMsg.style.color = 'var(--accent-orange)';
+                                statusMsg.innerText = 'هذا البريد الإلكتروني مشترك بالفعل في النشرة.';
+                                return;
+                            }
+                            
+                            const insertResponse = await fetch(`${supabaseUrl}/rest/v1/subscriptions`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': supabaseKey,
+                                    'Authorization': 'Bearer ' + supabaseKey,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify({ email: email })
+                            });
+                            
+                            if (!insertResponse.ok) throw new Error('Subscription failed');
+                            
+                            statusMsg.style.color = '#2ec4b6';
+                            statusMsg.innerText = 'تم الاشتراك بنجاح! شكراً لثقتك بوقاية برو.';
+                            emailInput.value = '';
+                        } catch (err) {
+                            console.error('Subscription error:', err);
+                            statusMsg.style.color = '#e71d36';
+                            statusMsg.innerText = 'حدث خطأ أثناء الاشتراك. يرجى المحاولة لاحقاً.';
+                        }
+                    });
+                }
+            });
 
             // Fetch config from Supabase
             fetch(supabaseUrl + '/rest/v1/adsense_config?id=eq.1&select=*', {
@@ -2487,6 +2543,16 @@
                         <a href="privacy.html" class="footer-menu-link">سياسة الخصوصية</a>
                         <a href="terms.html" class="footer-menu-link">اتفاقية الاستخدام</a>
                     </div>
+                </div>
+                <!-- Column 4: Newsletter Subscription -->
+                <div class="footer-col-newsletter">
+                    <div class="footer-col-title">النشرة الإخبارية</div>
+                    <p class="footer-about-text" style="margin-bottom: 15px;">اشترك معنا لتصلك أحدث المقالات وتنبيهات الأكواد الهندسية للسلامة.</p>
+                    <form id="footer-subscribe-form" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="email" id="subscriber-email" placeholder="البريد الإلكتروني..." required style="flex-grow: 1; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; min-width: 150px;">
+                        <button type="submit" class="btn" style="padding: 10px 18px; border-radius: 8px; font-size: 13px; cursor: pointer;">اشترك</button>
+                    </form>
+                    <p id="subscription-status" style="font-size: 12px; margin-top: 8px; display: none; line-height: 1.6;"></p>
                 </div>
             </div>
             <!-- Bottom Copyright bar -->
