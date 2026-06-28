@@ -530,6 +530,162 @@
         .preview-body-text p {
             margin-bottom: 20px;
         }
+
+        /* Responsive design updates for mobile devices */
+        @media (max-width: 768px) {
+            header {
+                padding: 12px 16px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .logo-img {
+                height: 38px;
+            }
+
+            .logo-text h1 {
+                font-size: 14px;
+            }
+
+            .logo-text span {
+                font-size: 9px;
+            }
+
+            .logout-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .container {
+                margin: 20px auto;
+                padding: 0 12px;
+            }
+
+            .tabs-header {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 12px;
+                margin-bottom: 20px;
+                gap: 10px;
+                border-bottom: 1px solid var(--border-color);
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent-orange) transparent;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tabs-header::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            .tabs-header::-webkit-scrollbar-thumb {
+                background: var(--accent-orange);
+                border-radius: 2px;
+            }
+
+            .tab-btn {
+                font-size: 13px;
+                padding: 8px 12px;
+                flex: 0 0 auto;
+            }
+
+            .tab-btn.active::after {
+                bottom: -13px;
+            }
+
+            .card {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+            }
+
+            .card-title {
+                font-size: 15px;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .stat-card {
+                padding: 12px !important;
+                border-radius: 12px !important;
+            }
+
+            .stat-card h3 {
+                font-size: 11px !important;
+            }
+
+            .stat-card div[id^="stat-"] {
+                font-size: 20px !important;
+            }
+
+            .stat-card div:last-child {
+                font-size: 24px !important;
+            }
+
+            /* Modify modals for mobile */
+            #edit-post-modal, #reply-comment-modal, #preview-modal {
+                padding: 12px 8px !important;
+            }
+
+            #edit-post-modal .card, #reply-comment-modal .card {
+                padding: 15px 12px;
+                border-radius: 12px;
+            }
+
+            .preview-container {
+                padding: 20px 12px;
+                border-radius: 12px;
+            }
+
+            .preview-title {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+
+            .preview-header-img {
+                height: 180px;
+                margin-bottom: 15px;
+            }
+
+            .preview-body-text {
+                font-size: 14.5px;
+                line-height: 1.8;
+            }
+
+            /* Responsive tables */
+            .table-responsive {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            .auth-card {
+                padding: 25px 15px;
+                border-radius: 12px;
+            }
+            
+            .auth-logo {
+                width: 60px;
+                margin-bottom: 15px;
+            }
+
+            .auth-title {
+                font-size: 17px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -766,7 +922,7 @@
                     لا توجد مقالات منشورة حالياً في قاعدة البيانات.
                 </div>
 
-                <div id="manage-posts-list" style="overflow-x: auto;">
+                <div id="manage-posts-list" class="table-responsive" style="overflow-x: auto;">
                     <!-- Posts table will be dynamically injected here -->
                 </div>
             </div>

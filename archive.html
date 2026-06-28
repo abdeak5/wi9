@@ -3324,15 +3324,51 @@
                             image = 'https://files.catbox.moe/ru6efb.jpeg';
                         }
 
-                        // Generate excerpt
+                        // Generate excerpt and clean duplicate image
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = content;
                         const excerpt = tempDiv.textContent.substring(0, 150).trim() + '...';
+                        
+                        try {
+                            const firstImg = tempDiv.querySelector('img');
+                            if (firstImg) {
+                                let elementToRemove = firstImg;
+                                let parent = firstImg.parentElement;
+                                if (parent && parent.tagName === 'A') {
+                                    elementToRemove = parent;
+                                    parent = parent.parentElement;
+                                }
+                                if (parent && (parent.classList.contains('separator') || parent.style.textAlign === 'center' || parent.style.clear === 'both')) {
+                                    elementToRemove = parent;
+                                    parent = parent.parentElement;
+                                }
+                                if (parent && (parent.tagName === 'TD' || parent.tagName === 'TR' || parent.tagName === 'TBODY' || parent.tagName === 'TABLE')) {
+                                    let table = parent;
+                                    while (table && table.tagName !== 'TABLE') {
+                                        table = table.parentElement;
+                                    }
+                                    if (table) {
+                                        const imgCount = table.querySelectorAll('img').length;
+                                        const textLen = table.textContent.trim().length;
+                                        if (imgCount === 1 && textLen < 50) {
+                                            elementToRemove = table;
+                                        }
+                                    }
+                                }
+                                if (elementToRemove && elementToRemove.parentNode) {
+                                    elementToRemove.parentNode.removeChild(elementToRemove);
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Error cleaning Blogger content image:', err);
+                        }
+                        
+                        const cleanedContent = tempDiv.innerHTML;
 
                         return {
                             id: postId,
                             title: title,
-                            content: content,
+                            content: cleanedContent,
                             excerpt: excerpt,
                             publishDate: publishDate,
                             categories: categories,
