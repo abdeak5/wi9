@@ -2152,6 +2152,47 @@
                 bottom: 15px;
             }
         }
+
+        /* Premium Footer Subscription Form Styling */
+        .footer-subscribe-input {
+            flex-grow: 1;
+            padding: 11px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+            color: #ffffff !important;
+            font-size: 13.5px;
+            min-width: 150px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .footer-subscribe-input:focus {
+            border-color: #f39c12 !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+        }
+        .footer-subscribe-btn {
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+            color: #ffffff !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2);
+            transition: all 0.3s ease;
+        }
+        .footer-subscribe-btn:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+        .footer-subscribe-btn:active {
+            transform: translateY(0);
+        }
+
 </style>
             <!-- Google AdSense & Socials Dynamic Loader -->
     <script>
@@ -2590,9 +2631,9 @@
                 <div class="footer-col-newsletter">
                     <div class="footer-col-title">النشرة الإخبارية</div>
                     <p class="footer-about-text" style="margin-bottom: 15px;">اشترك معنا لتصلك أحدث المقالات وتنبيهات الأكواد الهندسية للسلامة.</p>
-                    <form id="footer-subscribe-form" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <input type="email" id="subscriber-email" placeholder="البريد الإلكتروني..." required style="flex-grow: 1; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: #fff; font-size: 13px; min-width: 150px;">
-                        <button type="submit" class="btn" style="padding: 10px 18px; border-radius: 8px; font-size: 13px; cursor: pointer;">اشترك</button>
+                                        <form id="footer-subscribe-form" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="email" id="subscriber-email" class="footer-subscribe-input" placeholder="البريد الإلكتروني..." required>
+                        <button type="submit" class="footer-subscribe-btn">اشترك</button>
                     </form>
                     <p id="subscription-status" style="font-size: 12px; margin-top: 8px; display: none; line-height: 1.6;"></p>
                 </div>
