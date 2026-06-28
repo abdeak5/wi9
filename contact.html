@@ -2187,6 +2187,51 @@
                 }
             };
 
+            // Function to apply dynamic header menu
+            function applyHeaderMenu(config) {
+                if (!config || !config.header_menu) return;
+                try {
+                    const menuItems = JSON.parse(config.header_menu);
+                    if (!Array.isArray(menuItems)) return;
+                    
+                    const navMenu = document.querySelector('.nav-menu');
+                    if (!navMenu) return;
+                    
+                    let html = '';
+                    menuItems.forEach(item => {
+                        if (item.dropdown && Array.isArray(item.dropdown)) {
+                            html += `
+                            <div class="nav-item">
+                                <a href="${item.url || '#'}" class="nav-link">
+                                    ${item.title}
+                                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                                </a>
+                                <div class="dropdown-menu">
+                                    ${item.dropdown.map(sub => `<div class="dropdown-item"><a href="${sub.url || '#'}">${sub.title}</a></div>`).join('')}
+                                </div>
+                            </div>`;
+                        } else {
+                            html += `
+                            <div class="nav-item">
+                                <a href="${item.url || '#'}" class="nav-link">${item.title}</a>
+                            </div>`;
+                        }
+                    });
+                    
+                    navMenu.innerHTML = html;
+
+                    // Re-bind click listeners to close mobile menu
+                    const navLinks = navMenu.querySelectorAll('a');
+                    navLinks.forEach(link => {
+                        link.addEventListener('click', () => {
+                            navMenu.classList.remove('active');
+                        });
+                    });
+                } catch (e) {
+                    console.error('Error parsing dynamic header menu:', e);
+                }
+            }
+
             // Function to apply social media links dynamically
             function applySocialLinks() {
                 const socials = {
@@ -2257,6 +2302,9 @@
                         const el = document.getElementById('contact-hours-val');
                         if (el) el.innerText = config.contact_hours;
                     }
+
+                    // Render dynamic header menu
+                    applyHeaderMenu(config);
                 }
                 triggerReady();
             })

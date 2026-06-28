@@ -533,6 +533,14 @@
 
         /* Responsive design updates for mobile devices */
         @media (max-width: 768px) {
+            input[type="text"],
+            input[type="password"],
+            input[type="email"],
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+
             header {
                 padding: 12px 16px;
                 flex-direction: row;
@@ -882,6 +890,27 @@
 
                 <div style="margin-top: 20px;">
                     <button class="btn" id="save-contact-btn" onclick="saveContactSettings()">حفظ وتحديث بيانات الاتصال</button>
+                </div>
+            </div>
+
+            <!-- Header Menu Settings Card -->
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title">
+                    <span>🗂️</span> إعدادات أقسام القائمة العلوية (Header Navigation Menu)
+                </div>
+                
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                    يمكنك تعديل الأقسام الرئيسية والفرعية التي تظهر في شريط التنقل العلوي للموقع. يتم حفظ الأقسام بصيغة JSON لمرونة كاملة في إضافة القوائم المنسدلة (Dropdowns).
+                </p>
+
+                <div class="form-group full-width">
+                    <label for="header-menu-json">هيكل القائمة العلوي بصيغة JSON *</label>
+                    <textarea id="header-menu-json" rows="12" style="font-family: monospace; direction: ltr; text-align: left; width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; color: #a9ffb2;" placeholder="[...]"></textarea>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn" id="save-menu-btn" onclick="saveHeaderMenuSettings()">حفظ وتحديث القائمة العلوية</button>
+                    <button class="btn btn-secondary" onclick="resetHeaderMenuDefault()">استعادة القائمة الافتراضية</button>
                 </div>
             </div>
         </div>
@@ -1498,6 +1527,18 @@ ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;</c
                     document.getElementById('contact-address').value = config.contact_address || '';
                     document.getElementById('contact-hours').value = config.contact_hours || '';
 
+                    // Load header menu
+                    if (config.header_menu) {
+                        try {
+                            const parsed = JSON.parse(config.header_menu);
+                            document.getElementById('header-menu-json').value = JSON.stringify(parsed, null, 2);
+                        } catch (e) {
+                            document.getElementById('header-menu-json').value = config.header_menu;
+                        }
+                    } else {
+                        document.getElementById('header-menu-json').value = JSON.stringify(DEFAULT_HEADER_MENU, null, 2);
+                    }
+
                     // Dispatch change to update label color
                     document.getElementById('ads-toggle').dispatchEvent(new Event('change'));
                 }
@@ -1623,6 +1664,71 @@ ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;</c
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'حفظ وتحديث بيانات الاتصال';
+            }
+        }
+
+        const DEFAULT_HEADER_MENU = [
+            {"title": "السلامة المهنية", "url": "index.html#category/السلامة المهنية"},
+            {"title": "الفحص والاختبار (ITM)", "url": "index.html#category/الفحص والاختبار (ITM)"},
+            {"title": "أنظمة مكافحة الحريق", "url": "index.html#category/أنظمة مكافحة الحريق"},
+            {"title": "الإرشادات والنصائح", "url": "index.html#category/الإرشادات والنصائح", "dropdown": [
+                {"title": "إرشادات الأمن الصناعي", "url": "index.html#category/السلامة المهنية"},
+                {"title": "سلامة المختبرات", "url": "index.html#category/السلامة المهنية"},
+                {"title": "خطة إخلاء المنشآت", "url": "index.html#category/الإرشادات والنصائح"}
+            ]}
+        ];
+
+        function resetHeaderMenuDefault() {
+            if (confirm('هل أنت متأكد من رغبتك في استعادة القائمة الافتراضية؟ سيتم تعبئة الحقل بالقيم الافتراضية ويجب عليك الضغط على حفظ لتأكيد التغيير.')) {
+                document.getElementById('header-menu-json').value = JSON.stringify(DEFAULT_HEADER_MENU, null, 2);
+            }
+        }
+
+        async function saveHeaderMenuSettings() {
+            const val = document.getElementById('header-menu-json').value.trim();
+            if (!val) {
+                showAlert('الرجاء تعبئة حقل هيكل القائمة العلوي!', true);
+                return;
+            }
+
+            try {
+                // Validate JSON syntax first
+                JSON.parse(val);
+            } catch (err) {
+                showAlert('تنبيه: صيغة الـ JSON غير صحيحة! يرجى التأكد من عدم وجود أخطاء في كتابة الأقواس أو علامات التنصيص.', true);
+                return;
+            }
+
+            const btn = document.getElementById('save-menu-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الحفظ والتحديث...';
+
+            const payload = {
+                id: 1,
+                header_menu: val
+            };
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/adsense_config`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Database write error');
+
+                showAlert('تم حفظ وتحديث هيكل القائمة العلوية بنجاح وتعميمها على جميع صفحات الموقع!');
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء حفظ الإعدادات. تأكد من إعداد صلاحيات RLS بشكل صحيح.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'حفظ وتحديث القائمة العلوية';
             }
         }
 
