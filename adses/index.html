@@ -2109,9 +2109,9 @@ CREATE POLICY "Allow anon delete subscriptions" ON subscriptions FOR DELETE USIN
         function formatParagraph(text) {
             if (!text || !text.trim()) return '';
             let formatted = text.trim()
-                .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>')
                 .replace(/"([^"]+)"/g, '<span style="color: #f39c12; font-weight: 600;">"$1"</span>')
-                .replace(/«([^»]+)»/g, '<span style="color: #f39c12; font-weight: 600;">«$1»</span>');
+                .replace(/«([^»]+)»/g, '<span style="color: #f39c12; font-weight: 600;">«$1»</span>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #0d1e3d; font-weight: 700;">$1</strong>');
             return `<p style="font-size: 16.5px; line-height: 2; margin-bottom: 18px; color: #2c3e50; text-align: justify;">${formatted}</p>`;
         }
 
