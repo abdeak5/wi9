@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /adses/
+
+Sitemap: https://www.wi9ayah.pro/sitemap.xml
