@@ -1054,6 +1054,36 @@
                 </div>
             </div>
 
+            <!-- Author Profile Settings Card -->
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title">
+                    <span>✍️</span> إعدادات بروفايل الكاتب
+                </div>
+                
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                    أدخل تفاصيل الكاتب التي سيتم عرضها في نهاية المقالات بدلاً من زر تحميل الـ PDF.
+                </p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="author-name">الاسم واللقب</label>
+                        <input type="text" id="author-name" placeholder="مثال: المهندس أحمد">
+                    </div>
+                    <div class="form-group">
+                        <label for="author-title">الصفة أو التخصص</label>
+                        <input type="text" id="author-title" placeholder="مثال: مستشار السلامة والصحة المهنية">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="author-image">رابط صورة الكاتب</label>
+                        <input type="text" id="author-image" placeholder="مثال: https://files.catbox.moe/ub1za9.png">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn" id="save-author-btn" onclick="saveAuthorSettings()">حفظ وتحديث بروفايل الكاتب</button>
+                </div>
+            </div>
+
             <!-- Header Menu Settings Card -->
             <div class="card" style="margin-top: 25px;">
                 <div class="card-title">
@@ -1355,6 +1385,9 @@ ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS contact_phone text DEFAULT '
 ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS contact_email text DEFAULT 'info@wi9ayah.pro';
 ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS contact_address text DEFAULT 'طريق الملك فهد، الرياض، المملكة العربية السعودية';
 ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS contact_hours text DEFAULT 'الأحد - الخميس (8:00 صباحاً - 5:00 مساءً)';
+ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS author_name text DEFAULT 'المهندس أحمد';
+ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS author_title text DEFAULT 'مستشار السلامة والصحة المهنية ومكافحة الحرائق';
+ALTER TABLE adsense_config ADD COLUMN IF NOT EXISTS author_image text DEFAULT 'https://files.catbox.moe/ub1za9.png';
 
 -- إدخال الصف الافتراضي
 INSERT INTO adsense_config (
@@ -1735,6 +1768,11 @@ CREATE POLICY "Allow anon delete subscriptions" ON subscriptions FOR DELETE USIN
                     document.getElementById('contact-address').value = config.contact_address || '';
                     document.getElementById('contact-hours').value = config.contact_hours || '';
 
+                    // Load author info
+                    document.getElementById('author-name').value = config.author_name || '';
+                    document.getElementById('author-title').value = config.author_title || '';
+                    document.getElementById('author-image').value = config.author_image || '';
+
                     // Load header menu
                     if (config.header_menu) {
                         try {
@@ -1872,6 +1910,43 @@ CREATE POLICY "Allow anon delete subscriptions" ON subscriptions FOR DELETE USIN
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'حفظ وتحديث بيانات الاتصال';
+            }
+        }
+
+        // Save author profile settings to Supabase
+        async function saveAuthorSettings() {
+            const btn = document.getElementById('save-author-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الحفظ والتحديث...';
+
+            const payload = {
+                id: 1,
+                author_name: document.getElementById('author-name').value.trim() || 'المهندس أحمد',
+                author_title: document.getElementById('author-title').value.trim() || 'مستشار السلامة والصحة المهنية ومكافحة الحرائق',
+                author_image: document.getElementById('author-image').value.trim() || 'https://files.catbox.moe/ub1za9.png'
+            };
+
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/adsense_config`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Database write error');
+
+                showAlert('تم حفظ وتحديث بروفايل الكاتب بنجاح وتعميمها على جميع المقالات!');
+            } catch (err) {
+                console.error(err);
+                showAlert('حدث خطأ أثناء حفظ الإعدادات. تأكد من إعداد صلاحيات RLS بشكل صحيح وقمت بتشغيل كود الـ SQL لإضافة الأعمدة.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'حفظ وتحديث بروفايل الكاتب';
             }
         }
 
