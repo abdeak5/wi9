@@ -3820,7 +3820,7 @@
         const BLOGGER_URL = 'https://wiqayahpro.blogspot.com';
         const CACHE_KEY = 'wiqayah_posts_cache';
         const CACHE_TIME_KEY = 'wiqayah_posts_cache_time';
-        const REFRESH_INTERVAL = 30 * 1000; // 30 seconds - posts appear almost instantly
+        const REFRESH_INTERVAL = 300 * 1000; // 5 minutes - balanced sync for mobile performance
 
         // Helper to get high-res Blogger image
         function getHighResImage(url) {
@@ -3916,14 +3916,13 @@
                 handleRouting();
                 checkUrlSearch();
             } else {
-                showLoadingState();
-                fetchBloggerPosts();
+                loadAllPosts();
             }
 
-            // Sync every 4 minutes
+            // Sync every 5 minutes
             setInterval(() => {
                 console.log('مزامنة مع الموقع الأصلي...');
-                fetchBloggerPosts();
+                loadAllPosts();
             }, REFRESH_INTERVAL);
         }
 
@@ -3934,7 +3933,19 @@
             }
         }
 
-        function fetchBloggerPosts() {
+        async function loadAllPosts() {
+            showLoadingState();
+            
+            // Start fetching Supabase posts concurrently
+            const supabasePromise = fetchSupabasePosts();
+            
+            // Promise that resolves when loadBloggerPostsCallback runs
+            let bloggerResolve;
+            const bloggerPromise = new Promise((resolve) => {
+                bloggerResolve = resolve;
+            });
+            window.bloggerResolverFunc = bloggerResolve;
+
             const oldScript = document.getElementById('blogger-jsonp');
             if (oldScript) oldScript.remove();
 
@@ -3942,10 +3953,43 @@
             script.id = 'blogger-jsonp';
             script.src = BLOGGER_URL + '/feeds/posts/default?alt=json-in-script&callback=loadBloggerPostsCallback&max-results=150';
             script.onerror = function() {
-                console.error('فشل في جلب التدوينات');
-                loadPostsFromCacheFallback();
+                console.warn('Blogger jsonp fetch failed.');
+                if (window.bloggerResolverFunc) window.bloggerResolverFunc([]);
             };
             document.body.appendChild(script);
+
+            // Timeout after 2.5 seconds to prevent blocking page render on mobile networks
+            const timeoutPromise = new Promise((resolve) => setTimeout(() => {
+                console.warn('Blogger fetch timed out.');
+                resolve([]);
+            }, 2500));
+
+            try {
+                // Fetch Supabase posts (extremely fast REST API)
+                const supabasePosts = await supabasePromise;
+                
+                // Wait for Blogger posts or timeout (whichever resolves first)
+                const bloggerPosts = await Promise.race([bloggerPromise, timeoutPromise]);
+
+                // Merge and sort
+                allPosts = [...supabasePosts, ...bloggerPosts];
+                allPosts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+
+                // Cache merged result
+                localStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
+                localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+
+                console.log('تم تحميل التدوينات المدمجة بنجاح.');
+
+                renderCategoriesMenu();
+                renderPostsGrid();
+                setupSearchOverlayLogic();
+                handleRouting();
+                checkUrlSearch();
+            } catch (err) {
+                console.error('Error loading merged posts:', err);
+                loadPostsFromCacheFallback();
+            }
         }
 
         function loadPostsFromCacheFallback() {
@@ -4163,28 +4207,14 @@
                     });
                 }
 
-                // Fetch Supabase posts
-                const supabasePosts = await fetchSupabasePosts();
-
-                // Merge and sort
-                allPosts = [...supabasePosts, ...bloggerPosts];
-                allPosts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
-
-                // Cache the posts
-                localStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
-                localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-
-                console.log('تم جلب ' + allPosts.length + ' تدوينة (بما في ذلك ' + supabasePosts.length + ' من قاعدة البيانات) بنجاح.');
-
-                renderCategoriesMenu();
-                renderPostsGrid();
-                setupSearchOverlayLogic();
-                handleRouting();
-                checkUrlSearch();
-
+                if (window.bloggerResolverFunc) {
+                    window.bloggerResolverFunc(bloggerPosts);
+                }
             } catch (err) {
                 console.error('خطأ في معالجة البيانات:', err);
-                loadPostsFromCacheFallback();
+                if (window.bloggerResolverFunc) {
+                    window.bloggerResolverFunc([]);
+                }
             }
         };
 
