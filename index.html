@@ -2,15 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
     <!-- Ezoic Privacy & Consent Scripts -->
-    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
-    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+    <script defer data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
+    <script defer data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
     <!-- Ezoic Main Header & Analytics Scripts -->
     <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
     <script>
         window.ezstandalone = window.ezstandalone || {};
         ezstandalone.cmd = ezstandalone.cmd || [];
     </script>
-    <script src="//ezoicanalytics.com/analytics.js"></script>
+    <script defer src="//ezoicanalytics.com/analytics.js"></script>
     <meta name="google-adsense-account" content="ca-pub-1582630401556049">
     <title>وقاية برو | السلامة المهنية ومكافحة الحرائق</title>
     <meta name="description" content="منصة وقاية برو هي مرجعك الهندسي والمهني الأول للحماية من الحرائق واشتراطات السلامة المهنية، نهدف لتقديم محتوى عالي الجودة متوافق مع الأكواد العالمية والمحلية.">
@@ -3833,6 +3833,33 @@
         const CACHE_TIME_KEY = 'wiqayah_posts_cache_time';
         const REFRESH_INTERVAL = 300 * 1000; // 5 minutes - balanced sync for mobile performance
 
+        // ====== INSTANT CACHE PRE-LOAD (runs at script parse time, before DOM ready) ======
+        let _preloadedPosts = null;
+        let _preloadedTime = null;
+        try {
+            const _rawCache = localStorage.getItem(CACHE_KEY);
+            if (_rawCache) {
+                _preloadedPosts = JSON.parse(_rawCache);
+                _preloadedTime = parseInt(localStorage.getItem(CACHE_TIME_KEY) || '0');
+            }
+        } catch(e) { _preloadedPosts = null; }
+
+        // ====== PRE-FETCH: Start Blogger JSONP immediately (before DOM ready) ======
+        let _earlyBloggerResolve;
+        window._earlyBloggerPromise = new Promise(r => { _earlyBloggerResolve = r; });
+        window._earlyBloggerResolver = _earlyBloggerResolve;
+
+        // Inject Blogger JSONP script tag immediately at parse time
+        (function() {
+            const s = document.createElement('script');
+            s.id = 'blogger-jsonp-early';
+            s.src = BLOGGER_URL + '/feeds/posts/default?alt=json-in-script&callback=loadBloggerPostsCallback&max-results=150';
+            s.onerror = function() {
+                if (window._earlyBloggerResolver) window._earlyBloggerResolver([]);
+            };
+            document.head.appendChild(s);
+        })();
+
         // Helper to get high-res Blogger image
         function getHighResImage(url) {
             if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
@@ -3914,27 +3941,25 @@
 
         // ====== BLOGGER INTEGRATION ======
         function initBloggerIntegration() {
-            const cachedPosts = localStorage.getItem(CACHE_KEY);
-            const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
             const now = Date.now();
 
-            if (cachedPosts) {
-                // Render from cache immediately!
-                allPosts = JSON.parse(cachedPosts);
-                console.log('تم تحميل التدوينات من الذاكرة المؤقتة فورياً (SWR).');
+            if (_preloadedPosts && _preloadedPosts.length > 0) {
+                // INSTANT PATH: Pre-loaded from cache at script parse time — zero delay!
+                allPosts = _preloadedPosts;
+                console.log('تحميل فوري من الذاكرة المؤقتة (pre-parsed SWR).');
                 renderCategoriesMenu();
                 renderPostsGrid();
                 setupSearchOverlayLogic();
                 handleRouting();
                 checkUrlSearch();
 
-                // If cache is expired, revalidate in the background quietly
-                if (!cachedTime || (now - parseInt(cachedTime) > REFRESH_INTERVAL)) {
+                // If cache is stale, revalidate silently in background
+                if (!_preloadedTime || (now - _preloadedTime > REFRESH_INTERVAL)) {
                     loadAllPosts(false);
                 }
             } else {
-                // No cache at all: show loading spinner and fetch
-                loadAllPosts(true);
+                // First visit ever — keep the static HTML cards visible, load silently
+                loadAllPosts(false);
             }
 
             // Sync in the background every REFRESH_INTERVAL
@@ -3970,30 +3995,38 @@
             // Start fetching Supabase posts concurrently
             const supabasePromise = fetchSupabasePosts();
             
-            // Promise that resolves when loadBloggerPostsCallback runs
-            let bloggerResolve;
-            const bloggerPromise = new Promise((resolve) => {
-                bloggerResolve = resolve;
-            });
-            window.bloggerResolverFunc = bloggerResolve;
+            // Re-use the early pre-fetched Blogger promise if available, otherwise create new
+            let bloggerPromise;
+            if (window._earlyBloggerPromise) {
+                bloggerPromise = window._earlyBloggerPromise;
+                window._earlyBloggerPromise = null; // consume it once
+            } else {
+                let bloggerResolve;
+                bloggerPromise = new Promise((resolve) => {
+                    bloggerResolve = resolve;
+                });
+                window.bloggerResolverFunc = bloggerResolve;
 
-            const oldScript = document.getElementById('blogger-jsonp');
-            if (oldScript) oldScript.remove();
+                const oldScript = document.getElementById('blogger-jsonp');
+                if (oldScript) oldScript.remove();
+                const oldEarly = document.getElementById('blogger-jsonp-early');
+                if (oldEarly) oldEarly.remove();
 
-            const script = document.createElement('script');
-            script.id = 'blogger-jsonp';
-            script.src = BLOGGER_URL + '/feeds/posts/default?alt=json-in-script&callback=loadBloggerPostsCallback&max-results=150';
-            script.onerror = function() {
-                console.warn('Blogger jsonp fetch failed.');
-                if (window.bloggerResolverFunc) window.bloggerResolverFunc([]);
-            };
-            document.body.appendChild(script);
+                const script = document.createElement('script');
+                script.id = 'blogger-jsonp';
+                script.src = BLOGGER_URL + '/feeds/posts/default?alt=json-in-script&callback=loadBloggerPostsCallback&max-results=150';
+                script.onerror = function() {
+                    console.warn('Blogger jsonp fetch failed.');
+                    if (window.bloggerResolverFunc) window.bloggerResolverFunc([]);
+                };
+                document.body.appendChild(script);
+            }
 
-            // Timeout after 2.0 seconds to prevent blocking page render on mobile networks
+            // Timeout after 800ms — fast enough for good networks, graceful fallback for slow ones
             const timeoutPromise = new Promise((resolve) => setTimeout(() => {
                 console.warn('Blogger fetch timed out.');
                 resolve([]);
-            }, 2000));
+            }, 800));
 
             try {
                 // Fetch Supabase posts (extremely fast REST API)
@@ -4247,11 +4280,19 @@
                     });
                 }
 
+                if (window._earlyBloggerResolver) {
+                    window._earlyBloggerResolver(bloggerPosts);
+                    window._earlyBloggerResolver = null;
+                }
                 if (window.bloggerResolverFunc) {
                     window.bloggerResolverFunc(bloggerPosts);
                 }
             } catch (err) {
                 console.error('خطأ في معالجة البيانات:', err);
+                if (window._earlyBloggerResolver) {
+                    window._earlyBloggerResolver([]);
+                    window._earlyBloggerResolver = null;
+                }
                 if (window.bloggerResolverFunc) {
                     window.bloggerResolverFunc([]);
                 }
