@@ -6,7 +6,7 @@
     <meta property="og:description" content="# صيانة أنظمة الرشاشات المائية
 
 تعتمد حماية الأرواح والممتلكات بشكل رئيسي على جاهزية أنظمة الإطفاء التلقائية. يوفر كود **NFPA 25** القواعد الصارمة لعم...">
-    <meta property="og:image" content="assets/images/sprinkler_system.png">
+    <meta property="og:image" content="../assets/images/sprinkler_system.png">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.wi9ayah.pro/posts/sb-6.html">
         
@@ -3060,7 +3060,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div class="single-post-cover-container" style="width: 100%; max-height: 480px; overflow: hidden; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
-            <img src="assets/images/sprinkler_system.png" alt="أهمية صيانة واختبار شبكات رشاشات الحريق المائية طبقاً لـ NFPA 25" style="width: 100%; height: auto; object-fit: cover; max-height: 480px; display: block;">
+            <img src="../assets/images/sprinkler_system.png" alt="أهمية صيانة واختبار شبكات رشاشات الحريق المائية طبقاً لـ NFPA 25" style="width: 100%; height: auto; object-fit: cover; max-height: 480px; display: block;">
         </div>
         
         <div class="post-ad-wrapper top-post-ad" style="margin: 20px 0; text-align: center;">
@@ -4023,6 +4023,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Helper to get high-res Blogger image
         function getHighResImage(url) {
             if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
+            if (url.startsWith('assets/images/')) {
+                const inSubdir = window.location.pathname.includes('/adses/') || window.location.pathname.includes('/posts/') || window.location.href.includes('/adses/') || window.location.href.includes('/posts/');
+                if (inSubdir) {
+                    return '../' + url;
+                }
+            }
             if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
                 if (url.includes('=')) {
                     return url.split('=')[0] + '=s1600';
@@ -4521,12 +4527,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 const firstCat = post.categories[0] || 'Ø¹Ø§Ù…';
                 const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
 
-                html += '<article class="post-card" onclick="window.location.hash=\'post/' + post.id + '\'">' +
+                html += '<article class="post-card" onclick="window.location.href=\'posts/' + post.id + '.html\'">' +
                     '<div class="post-img-wrapper">' +
                         '<img src="' + imgSrc + '" alt="' + post.title + '" loading="lazy">' +
                         '<span class="post-category-badge">' + firstCat + '</span>' +
                         '<div class="post-img-overlay">' +
-                            '<h3 class="post-title"><a href="#post/' + post.id + '" onclick="event.stopPropagation();">' + post.title + '</a></h3>' +
+                            '<h3 class="post-title"><a href="posts/' + post.id + '.html" onclick="event.stopPropagation();">' + post.title + '</a></h3>' +
                             '<p class="post-excerpt">' + post.excerpt + '</p>' +
                             '<div class="post-meta-footer">' +
                                 '<div class="post-meta-item">' +
@@ -5126,12 +5132,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         const firstCat = post.categories[0] || 'عام';
                         const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
 
-                        html += '<article class="post-card" onclick="window.location.hash=\'post/' + post.id + '\'">' +
+                        html += '<article class="post-card" onclick="window.location.href=\'posts/' + post.id + '.html\'">' +
                             '<div class="post-img-wrapper">' +
                                 '<img src="' + imgSrc + '" alt="' + post.title + '" loading="lazy">' +
                                 '<span class="post-category-badge">' + firstCat + '</span>' +
                                 '<div class="post-img-overlay">' +
-                                    '<h3 class="post-title"><a href="#post/' + post.id + '" onclick="event.stopPropagation();">' + post.title + '</a></h3>' +
+                                    '<h3 class="post-title"><a href="posts/' + post.id + '.html" onclick="event.stopPropagation();">' + post.title + '</a></h3>' +
                                 '</div>' +
                             '</div>' +
                             '<div class="post-card-body">' +

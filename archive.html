@@ -3297,6 +3297,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // Helper to get high-res Blogger image
         function getHighResImage(url) {
             if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
+            if (url.startsWith('assets/images/')) {
+                const inSubdir = window.location.pathname.includes('/adses/') || window.location.pathname.includes('/posts/') || window.location.href.includes('/adses/') || window.location.href.includes('/posts/');
+                if (inSubdir) {
+                    return '../' + url;
+                }
+            }
             if (url.includes('blogger.googleusercontent.com') || url.includes('bp.blogspot.com')) {
                 if (url.includes('=')) {
                     return url.split('=')[0] + '=s1600';

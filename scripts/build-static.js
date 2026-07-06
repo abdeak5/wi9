@@ -238,13 +238,20 @@ async function build() {
         const dateStr = formatDate(post.publishDate);
         const readTime = calculateReadTime(post.content);
         const firstCat = post.categories[0] || 'عام';
-        const imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
+        
+        let imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
+        if (imgSrc.startsWith('assets/images/')) {
+            imgSrc = '../' + imgSrc;
+        }
+
         const categoriesHtml = post.categories.map(cat => {
             return `<span class="post-category-badge" style="position:static; display:inline-block; margin-left:5px;">${cat}</span>`;
         }).join('');
 
         // Helper to insert middle ad
         let processedContent = post.content || '';
+        processedContent = processedContent.replace(/src="assets\/images\//g, 'src="../assets/images/');
+        
         const adCode = `<div class="post-ad-wrapper middle-post-ad" style="margin: 30px 0; text-align: center;">
             <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 5px; text-align: center;">إعلان</div>
             <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"></ins>
