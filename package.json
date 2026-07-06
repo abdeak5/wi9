@@ -1,0 +1,10 @@
+{
+  "name": "wi9ayah-pro",
+  "version": "1.0.0",
+  "description": "منصة وقاية برو للسلامة المهنية",
+  "main": "index.html",
+  "scripts": {
+    "build": "node scripts/build-static.js"
+  },
+  "dependencies": {}
+}
