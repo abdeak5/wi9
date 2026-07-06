@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /adses/
+Disallow: /host
+Disallow: /host.html
 
 Sitemap: https://www.wi9ayah.pro/sitemap.xml
