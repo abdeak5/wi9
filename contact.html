@@ -3211,9 +3211,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     filtered.forEach(post => {
                         const item = document.createElement('a');
                         item.className = 'search-result-item';
+                        // Determine path to home index.html
+                        const inPostsDir = window.location.pathname.includes('/posts/') || window.location.href.includes('/posts/');
+                        const inOtherDir = window.location.pathname.includes('/adses/') || window.location.href.includes('/adses/');
                         const isMain = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('wi9/') || window.location.pathname.endsWith('wi9');
-                        const prefix = isMain ? '' : 'index.html';
-                        item.setAttribute('href', prefix + '#post/' + post.id);
+                        
+                        // Check if this post is static
+                        const staticPosts = ["post-90184712", "post-20194875", "post-10294857", "post-30485729", "post-40192847", "post-50293847"];
+                        let postUrl = '';
+                        if (staticPosts.includes(post.id)) {
+                            postUrl = inPostsDir ? `${post.id}.html` : `posts/${post.id}.html`;
+                        } else {
+                            const prefix = (inPostsDir || inOtherDir) ? '../index.html' : (isMain ? '' : 'index.html');
+                            postUrl = `${prefix}#post/${post.id}`;
+                        }
+                        item.setAttribute('href', postUrl);
                         
                         item.addEventListener('click', () => {
                             document.getElementById('search-overlay').classList.remove('active');

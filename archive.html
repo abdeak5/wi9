@@ -3312,6 +3312,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return url;
         }
 
+        function getPostUrl(id) {
+            const staticPosts = ["sb-1", "sb-4", "sb-5", "sb-6", "sb-7", "sb-8", "sb-9", "sb-10", "sb-11", "sb-12", "sb-13", "sb-14", "2333052999508581081", "4360444015506362870", "7592811065746011668", "7610161373785650346", "8435783334037501955", "9146132755992129993"];
+            if (staticPosts.includes(id)) {
+                const inPostsDir = window.location.pathname.includes('/posts/') || window.location.href.includes('/posts/');
+                return inPostsDir ? `${id}.html` : `posts/${id}.html`;
+            }
+            const inPostsDir = window.location.pathname.includes('/posts/') || window.location.href.includes('/posts/');
+            const inOtherDir = window.location.pathname.includes('/adses/') || window.location.href.includes('/adses/');
+            const prefix = (inPostsDir || inOtherDir) ? '../index.html' : 'index.html';
+            return `${prefix}#post/${id}`;
+        }
+
         let allPosts = [];
         let filteredPosts = [];
 
@@ -3758,6 +3770,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 const dateStr = formatDate(post.publishDate);
                 const readTime = calculateReadTime(post.content);
                 const firstCat = post.categories[0] || 'عام';
+                const postUrl = getPostUrl(post.id);
 
                 html += `
                 <div class="timeline-item">
@@ -3773,7 +3786,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div class="timeline-card-content">
                             <div>
                                 <h3 class="timeline-card-title">
-                                    <a href="posts/${post.id}.html">${post.title}</a>
+                                    <a href="${postUrl}">${post.title}</a>
                                 </h3>
                                 <p class="timeline-card-excerpt">${post.excerpt}</p>
                             </div>
@@ -3781,7 +3794,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <div class="timeline-card-tags">
                                     ${post.categories.map(cat => `<span class="timeline-card-tag">${cat}</span>`).join('')}
                                 </div>
-                                <a href="posts/${post.id}.html" class="timeline-card-btn">
+                                <a href="${postUrl}" class="timeline-card-btn">
                                     <span>عرض التفاصيل</span>
                                     <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
                                 </a>
@@ -4285,9 +4298,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     filtered.forEach(post => {
                         const item = document.createElement('a');
                         item.className = 'search-result-item';
+                        // Determine path to home index.html
+                        const inPostsDir = window.location.pathname.includes('/posts/') || window.location.href.includes('/posts/');
+                        const inOtherDir = window.location.pathname.includes('/adses/') || window.location.href.includes('/adses/');
                         const isMain = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('wi9/') || window.location.pathname.endsWith('wi9');
-                        const prefix = isMain ? '' : 'index.html';
-                        item.setAttribute('href', prefix + '#post/' + post.id);
+                        
+                        // Check if this post is static
+                        const staticPosts = ["post-90184712", "post-20194875", "post-10294857", "post-30485729", "post-40192847", "post-50293847"];
+                        let postUrl = '';
+                        if (staticPosts.includes(post.id)) {
+                            postUrl = inPostsDir ? `${post.id}.html` : `posts/${post.id}.html`;
+                        } else {
+                            const prefix = (inPostsDir || inOtherDir) ? '../index.html' : (isMain ? '' : 'index.html');
+                            postUrl = `${prefix}#post/${post.id}`;
+                        }
+                        item.setAttribute('href', postUrl);
                         
                         item.addEventListener('click', () => {
                             document.getElementById('search-overlay').classList.remove('active');

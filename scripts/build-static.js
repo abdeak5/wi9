@@ -1,9 +1,30 @@
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const BLOGGER_URL = 'https://wiqayahpro.blogspot.com';
 const SUPABASE_URL = 'https://hcoafdfhpizcgbbkcois.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__VZ2YFq6V_2SgVmd0y-AuA_U0StE5PG';
+
+function httpsGet(url, headers = {}) {
+    return new Promise((resolve, reject) => {
+        https.get(url, { headers }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+            res.on('end', () => {
+                resolve({
+                    ok: res.statusCode >= 200 && res.statusCode < 300,
+                    status: res.statusCode,
+                    json: async () => JSON.parse(data)
+                });
+            });
+        }).on('error', (err) => {
+            reject(err);
+        });
+    });
+}
 
 // Helper to calculate read time
 function calculateReadTime(content) {
@@ -112,11 +133,9 @@ async function build() {
     // 1. Fetch Supabase posts
     console.log('Fetching posts from Supabase...');
     try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?order=created_at.desc`, {
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
+        const res = await httpsGet(`${SUPABASE_URL}/rest/v1/posts?order=created_at.desc`, {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
         });
         if (res.ok) {
             const data = await res.json();
@@ -146,7 +165,7 @@ async function build() {
     // 2. Fetch Blogger posts
     console.log('Fetching posts from Blogger...');
     try {
-        const res = await fetch(`${BLOGGER_URL}/feeds/posts/default?alt=json&max-results=150`);
+        const res = await httpsGet(`${BLOGGER_URL}/feeds/posts/default?alt=json&max-results=150`);
         if (res.ok) {
             const data = await res.json();
             if (data && data.feed && data.feed.entry) {
