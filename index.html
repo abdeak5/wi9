@@ -3918,22 +3918,29 @@
             const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
             const now = Date.now();
 
-            if (cachedPosts && cachedTime && (now - parseInt(cachedTime) < REFRESH_INTERVAL)) {
+            if (cachedPosts) {
+                // Render from cache immediately!
                 allPosts = JSON.parse(cachedPosts);
-                console.log('تم تحميل التدوينات من الذاكرة المؤقتة.');
+                console.log('تم تحميل التدوينات من الذاكرة المؤقتة فورياً (SWR).');
                 renderCategoriesMenu();
                 renderPostsGrid();
                 setupSearchOverlayLogic();
                 handleRouting();
                 checkUrlSearch();
+
+                // If cache is expired, revalidate in the background quietly
+                if (!cachedTime || (now - parseInt(cachedTime) > REFRESH_INTERVAL)) {
+                    loadAllPosts(false);
+                }
             } else {
-                loadAllPosts();
+                // No cache at all: show loading spinner and fetch
+                loadAllPosts(true);
             }
 
-            // Sync every 5 minutes
+            // Sync in the background every REFRESH_INTERVAL
             setInterval(() => {
-                console.log('مزامنة مع الموقع الأصلي...');
-                loadAllPosts();
+                console.log('مزامنة خلفية مع الموقع الأصلي...');
+                loadAllPosts(false);
             }, REFRESH_INTERVAL);
         }
 
@@ -3944,8 +3951,21 @@
             }
         }
 
-        async function loadAllPosts() {
-            showLoadingState();
+        function postsHaveChanged(oldList, newList) {
+            if (!oldList || oldList.length === 0) return true;
+            if (oldList.length !== newList.length) return true;
+            for (let i = 0; i < oldList.length; i++) {
+                if (oldList[i].id !== newList[i].id || oldList[i].publishDate !== newList[i].publishDate) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        async function loadAllPosts(showSpinner = false) {
+            if (showSpinner) {
+                showLoadingState();
+            }
             
             // Start fetching Supabase posts concurrently
             const supabasePromise = fetchSupabasePosts();
@@ -3969,11 +3989,11 @@
             };
             document.body.appendChild(script);
 
-            // Timeout after 2.5 seconds to prevent blocking page render on mobile networks
+            // Timeout after 2.0 seconds to prevent blocking page render on mobile networks
             const timeoutPromise = new Promise((resolve) => setTimeout(() => {
                 console.warn('Blogger fetch timed out.');
                 resolve([]);
-            }, 2500));
+            }, 2000));
 
             try {
                 // Fetch Supabase posts (extremely fast REST API)
@@ -3983,8 +4003,13 @@
                 const bloggerPosts = await Promise.race([bloggerPromise, timeoutPromise]);
 
                 // Merge and sort
-                allPosts = [...supabasePosts, ...bloggerPosts];
-                allPosts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+                const newPosts = [...supabasePosts, ...bloggerPosts];
+                newPosts.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+
+                // Check if posts have changed compared to current allPosts
+                const hasChanged = postsHaveChanged(allPosts, newPosts);
+
+                allPosts = newPosts;
 
                 // Cache merged result
                 localStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
@@ -3992,14 +4017,18 @@
 
                 console.log('تم تحميل التدوينات المدمجة بنجاح.');
 
-                renderCategoriesMenu();
-                renderPostsGrid();
-                setupSearchOverlayLogic();
-                handleRouting();
-                checkUrlSearch();
+                if (showSpinner || hasChanged) {
+                    renderCategoriesMenu();
+                    renderPostsGrid();
+                    setupSearchOverlayLogic();
+                    handleRouting();
+                    checkUrlSearch();
+                }
             } catch (err) {
                 console.error('Error loading merged posts:', err);
-                loadPostsFromCacheFallback();
+                if (showSpinner) {
+                    loadPostsFromCacheFallback();
+                }
             }
         }
 
