@@ -872,26 +872,72 @@
 
         /* Responsive UI queries */
         @media (max-width: 900px) {
-            body {
+            #app-container {
                 flex-direction: column;
             }
             .sidebar {
                 width: 100%;
                 height: auto;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            .sidebar-brand {
+                height: 60px !important;
             }
             .sidebar-menu {
-                display: flex;
-                flex-wrap: wrap;
-                padding: 10px;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                padding: 8px;
+                gap: 4px;
+            }
+            .menu-item {
+                margin: 0 !important;
             }
             .menu-item a {
-                padding: 10px 15px;
+                padding: 8px 12px;
+                font-size: 13px;
+                justify-content: flex-start;
+            }
+            .sidebar-footer {
+                padding: 10px 20px;
+                justify-content: space-between;
+                background-color: rgba(0,0,0,0.1);
             }
             .content-area {
-                padding: 20px;
+                padding: 15px;
             }
             .main-header {
-                padding: 0 20px;
+                padding: 15px;
+                height: auto;
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .form-row > div {
+                flex: 1;
+            }
+            .details-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .details-nav {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            .dns-actions-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .dns-actions-row .btn-action {
+                width: 100%;
+                justify-content: center;
             }
         }
 
@@ -1164,7 +1210,7 @@
                                             <span class="slider"></span>
                                         </label>
                                     </td>
-                                    <td><span class="date-text">Jun 28, 2027</span></td>
+                                    <td><span class="date-text">Jun 28, 2028</span></td>
                                     <td>
                                         <button class="btn-manage" onclick="manageDomain('wi9ayah.pro')">Manage</button>
                                     </td>
@@ -1475,7 +1521,7 @@
                                     <td><strong>PositiveSSL Multi-Domain</strong></td>
                                     <td>DV SSL Certificate</td>
                                     <td>wi9ayah.pro, www.wi9ayah.pro, wi9ayah.com, wi9ayah.net</td>
-                                    <td><span class="date-text">Jun 28, 2027</span></td>
+                                    <td><span class="date-text">Jun 28, 2028</span></td>
                                     <td><span class="status-badge">ACTIVE</span></td>
                                     <td><button class="btn-manage" onclick="showToast('SSL certificate details verified.')">View Details</button></td>
                                 </tr>
@@ -1516,32 +1562,92 @@
 
                 <!-- 2I. MOCK VIEW: PROFILE -->
                 <div id="profile-view" style="display:none;">
-                    <div class="info-card" style="max-width:600px; margin:0 auto;">
-                        <div class="info-card-title">User Account Information</div>
-                        <div style="text-align:center; margin-bottom:30px;">
-                            <div style="width:80px; height:80px; border-radius:50%; background-color:#de3e1c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; margin:0 auto 15px;">W</div>
-                            <h4 style="font-size:18px; font-weight:800; color:#2b2d35; margin-bottom:5px;">Wiqayah Pro Administrator</h4>
-                            <span style="font-size:13px; color:var(--nc-text-muted);">Account ID: wiqayah_admin</span>
-                        </div>
+                    <div style="display:grid; grid-template-columns:1fr; gap:30px;">
                         
-                        <div style="font-size:13.5px; line-height:2.2; color:var(--nc-text);">
-                            <div style="display:flex; border-bottom:1px solid #f1f3f4; padding:8px 0; gap:10px;">
-                                <span style="width:180px; color:var(--nc-text-muted); font-weight:600; flex-shrink:0;">Linked Email</span>
-                                <strong>wiqayahpro@gmail.com</strong>
+                        <!-- 1. EDIT PROFILE CARD -->
+                        <div class="info-card">
+                            <div class="info-card-title">✍️ إعدادات الحساب والبروفايل (Profile Settings)</div>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:15px; margin-bottom:20px;">
+                                <div class="form-group">
+                                    <label for="profile-name" style="font-weight:700; margin-bottom: 5px; display: block; font-size: 13px;">الاسم بالكامل (Full Name)</label>
+                                    <input type="text" id="profile-name" value="محمد عبادي" style="width:100%; padding:10px; border:1px solid var(--nc-border); border-radius:6px; font-size:14px; box-sizing: border-box;" oninput="syncProfileToCertificate()">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-email" style="font-weight:700; margin-bottom: 5px; display: block; font-size: 13px;">البريد الإلكتروني (Email Address)</label>
+                                    <input type="email" id="profile-email" value="wiqayahpro@gmail.com" style="width:100%; padding:10px; border:1px solid var(--nc-border); border-radius:6px; font-size:14px; box-sizing: border-box;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-country" style="font-weight:700; margin-bottom: 5px; display: block; font-size: 13px;">الدولة (Country)</label>
+                                    <select id="profile-country" style="width:100%; padding:10px; border:1px solid var(--nc-border); border-radius:6px; font-size:14px; background-color:#fff; box-sizing: border-box;" onchange="syncProfileToCertificate()">
+                                        <option value="السعودية">Saudi Arabia (السعودية)</option>
+                                        <option value="الإمارات">United Arab Emirates (الإمارات)</option>
+                                        <option value="مصر">Egypt (مصر)</option>
+                                        <option value="قطر">Qatar (قطر)</option>
+                                        <option value="الكويت">Kuwait (الكويت)</option>
+                                        <option value="عمان">Oman (عمان)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-city" style="font-weight:700; margin-bottom: 5px; display: block; font-size: 13px;">المدينة (City)</label>
+                                    <input type="text" id="profile-city" value="الرياض" style="width:100%; padding:10px; border:1px solid var(--nc-border); border-radius:6px; font-size:14px; box-sizing: border-box;">
+                                </div>
                             </div>
-                            <div style="display:flex; border-bottom:1px solid #f1f3f4; padding:8px 0; gap:10px;">
-                                <span style="width:180px; color:var(--nc-text-muted); font-weight:600; flex-shrink:0;">Two-Factor (2FA)</span>
-                                <span style="color:#3b8780; font-weight:700;">ACTIVE (Google Authenticator)</span>
-                            </div>
-                            <div style="display:flex; border-bottom:1px solid #f1f3f4; padding:8px 0; gap:10px;">
-                                <span style="width:180px; color:var(--nc-text-muted); font-weight:600; flex-shrink:0;">API Access Token</span>
-                                <span style="font-family:monospace; color:var(--nc-text-muted);">Enabled (Active keys)</span>
-                            </div>
-                            <div style="display:flex; padding:8px 0; gap:10px;">
-                                <span style="width:180px; color:var(--nc-text-muted); font-weight:600; flex-shrink:0;">Account Security Tier</span>
-                                <span class="status-badge" style="padding:2px 8px; font-size:11px;">HIGH STRENGTH</span>
+                            <button class="btn-action primary" onclick="saveProfileData()">حفظ التعديلات (Save Profile)</button>
+                        </div>
+
+                        <!-- 2. DOMAIN REGISTRY CERTIFICATE -->
+                        <div class="info-card" style="border: 2px solid #d4af37; background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%); position: relative; overflow: hidden; padding: 40px; box-shadow: 0 4px 15px rgba(212,175,55,0.15); box-sizing: border-box;">
+                            <!-- Gold border accent lines -->
+                            <div style="position:absolute; top:10px; left:10px; right:10px; bottom:10px; border:1px solid #d4af37; pointer-events:none; opacity:0.6;"></div>
+                            
+                            <div style="text-align:center; position:relative; z-index:2;">
+                                <div style="font-size: 32px; margin-bottom: 10px;">🛡️</div>
+                                <h3 style="font-family:'Outfit', sans-serif; font-size:24px; font-weight:800; color:#d4af37; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Domain Registration Certificate</h3>
+                                <h4 style="font-family:'Cairo', sans-serif; font-size:16px; font-weight:700; color:#2c3e50; margin-bottom:20px;">شهادة ملكية النطاق الرسمية</h4>
+                                
+                                <div style="width:100px; height:2px; background-color:#d4af37; margin:0 auto 25px;"></div>
+                                
+                                <p style="font-size:14px; color:#555; line-height:1.8; max-width:540px; margin:0 auto 25px;">
+                                    This official document certifies that the domain name listed below is fully registered and licensed under the authority of Namecheap Inc. Registrar, and is under the legal ownership and administrative control of:
+                                </p>
+                                
+                                <div style="background-color:rgba(212,175,55,0.05); padding:20px; border-radius:8px; border:1px dashed #d4af37; display:inline-block; min-width:300px; max-width:100%; margin-bottom:30px; box-sizing: border-box;">
+                                    <div style="font-size:12px; color:#7f8c8d; text-transform:uppercase;">Registrant / المالك</div>
+                                    <strong id="cert-owner-name" style="font-size:20px; color:#2b2d35; display:block; margin:5px 0;">محمد عبادي</strong>
+                                    <span id="cert-owner-country" style="font-size:14px; color:#27ae60; font-weight:700;">Saudi Arabia (المملكة العربية السعودية)</span>
+                                </div>
+                                
+                                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:20px; max-width:600px; margin:0 auto; font-size:13px; color:#555; text-align:left; border-top:1px solid #f1f3f4; padding-top:20px;">
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color:#7f8c8d; display:block;">Domain Name / النطاق</span>
+                                        <strong style="font-size:15px; color:#de3e1c;">wi9ayah.pro</strong>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color:#7f8c8d; display:block;">Registry ID / معرف النطاق</span>
+                                        <strong style="font-size:14px; font-family:monospace; color:#2c3e50;">NC-938210-PRO</strong>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <span style="color:#7f8c8d; display:block;">Expiration Date / تاريخ الانتهاء</span>
+                                        <strong style="font-size:14px; color:#27ae60;">June 28, 2028</strong>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top:40px; display:flex; justify-content:space-between; align-items:center; max-width:600px; margin-left:auto; margin-right:auto; flex-wrap: wrap; gap: 20px;">
+                                    <div style="text-align:left; font-size:11px; color:#95a5a6;">
+                                        <span>Authorized Signature</span>
+                                        <div style="font-family:'Courier New', monospace; font-size:15px; font-weight:700; color:#de3e1c; margin-top:5px; transform:rotate(-2deg);">Namecheap Registry Seal</div>
+                                    </div>
+                                    <div style="width:70px; height:70px; border-radius:50%; border:2px double #d4af37; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px; color:#d4af37; transform:rotate(12deg); background-color:#fff; margin: 0 auto;">
+                                        OFFICIAL SEAL
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:30px;">
+                                    <button class="btn-action" style="border-color:#d4af37; color:#d4af37;" onclick="window.print()">🖨️ طباعة الشهادة (Print Certificate)</button>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -1726,7 +1832,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <span class="status-badge" style="margin-bottom:5px;">ACTIVE</span>
-                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2027</span>
+                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2028</span>
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f3f4; padding:15px 0;">
@@ -1739,7 +1845,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <span class="status-badge" style="margin-bottom:5px;">ACTIVE</span>
-                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2027</span>
+                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2028</span>
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 0;">
@@ -1752,7 +1858,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <span class="status-badge" style="margin-bottom:5px;">ACTIVE</span>
-                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2027</span>
+                                    <span style="font-size:12px; display:block; color:var(--nc-text-muted);">Renews on Jun 28, 2028</span>
                                 </div>
                             </div>
                         </div>
@@ -1806,6 +1912,7 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 initDnsRecords();
+                loadProfileData();
             }
         });
 
@@ -1826,6 +1933,7 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('app-container').style.display = 'flex';
                     initDnsRecords();
+                loadProfileData();
                 }, 300);
             } else {
                 errorMsg.style.display = 'block';
@@ -2284,6 +2392,67 @@
 
             showToast('DNS resource record deleted successfully.');
             renderDnsRecordsTable();
+        }
+
+        // Load and Save Profile Data + dynamic certificate syncing
+        function loadProfileData() {
+            const savedName = localStorage.getItem('nc_profile_name') || 'محمد عبادي';
+            const savedEmail = localStorage.getItem('nc_profile_email') || 'wiqayahpro@gmail.com';
+            const savedCountry = localStorage.getItem('nc_profile_country') || 'السعودية';
+            const savedCity = localStorage.getItem('nc_profile_city') || 'الرياض';
+
+            const nameInput = document.getElementById('profile-name');
+            const emailInput = document.getElementById('profile-email');
+            const countrySelect = document.getElementById('profile-country');
+            const cityInput = document.getElementById('profile-city');
+
+            if (nameInput) nameInput.value = savedName;
+            if (emailInput) emailInput.value = savedEmail;
+            if (countrySelect) countrySelect.value = savedCountry;
+            if (cityInput) cityInput.value = savedCity;
+
+            syncProfileToCertificate();
+        }
+
+        function syncProfileToCertificate() {
+            const nameVal = document.getElementById('profile-name')?.value || 'محمد عبادي';
+            const countryVal = document.getElementById('profile-country')?.value || 'السعودية';
+            
+            const certName = document.getElementById('cert-owner-name');
+            const certCountry = document.getElementById('cert-owner-country');
+
+            if (certName) certName.textContent = nameVal;
+            if (certCountry) {
+                if (countryVal === 'السعودية') {
+                    certCountry.textContent = 'Saudi Arabia (المملكة العربية السعودية)';
+                } else if (countryVal === 'الإمارات') {
+                    certCountry.textContent = 'United Arab Emirates (دولة الإمارات العربية المتحدة)';
+                } else if (countryVal === 'مصر') {
+                    certCountry.textContent = 'Egypt (جمهورية مصر العربية)';
+                } else if (countryVal === 'قطر') {
+                    certCountry.textContent = 'Qatar (دولة قطر)';
+                } else if (countryVal === 'الكويت') {
+                    certCountry.textContent = 'Kuwait (دولة الكويت)';
+                } else if (countryVal === 'عمان') {
+                    certCountry.textContent = 'Oman (سلطنة عمان)';
+                } else {
+                    certCountry.textContent = countryVal;
+                }
+            }
+        }
+
+        function saveProfileData() {
+            const nameVal = document.getElementById('profile-name').value;
+            const emailVal = document.getElementById('profile-email').value;
+            const countryVal = document.getElementById('profile-country').value;
+            const cityVal = document.getElementById('profile-city').value;
+
+            localStorage.setItem('nc_profile_name', nameVal);
+            localStorage.setItem('nc_profile_email', emailVal);
+            localStorage.setItem('nc_profile_country', countryVal);
+            localStorage.setItem('nc_profile_city', cityVal);
+
+            showToast('تم حفظ تعديلات الملف الشخصي بنجاح!');
         }
     </script>
 </body>
