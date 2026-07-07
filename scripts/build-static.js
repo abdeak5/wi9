@@ -436,6 +436,8 @@ async function build() {
             postHtml = postHtml.split(`href='${link}'`).join(`href='../${link}'`);
             postHtml = postHtml.split(`href="${link}?`).join(`href="../${link}?`);
             postHtml = postHtml.split(`href='${link}?`).join(`href='../${link}?`);
+            postHtml = postHtml.split(`href="${link}#`).join(`href="../${link}#`);
+            postHtml = postHtml.split(`href='${link}#`).join(`href='../${link}#`);
         });
 
         // 7. Inject static single-post indicator variables in JS header
