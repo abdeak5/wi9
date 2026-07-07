@@ -44,6 +44,12 @@ function formatDate(dateStr) {
     }
 }
 
+// Helper to map category display names
+function getCategoryDisplayName(cat) {
+    if (cat === 'الإرشادات والنصائح' || cat === 'الارشادا والنصائح') return 'أكواد الـ NFPA';
+    return cat;
+}
+
 // Helper to get high-res Blogger image
 function getHighResImage(url) {
     if (!url) return 'https://files.catbox.moe/ru6efb.jpeg';
@@ -277,7 +283,7 @@ async function build() {
     allPosts.forEach(post => {
         const dateStr = formatDate(post.publishDate);
         const readTime = calculateReadTime(post.content);
-        const firstCat = post.categories[0] || 'عام';
+        const firstCat = getCategoryDisplayName(post.categories[0] || 'عام');
         
         let imgSrc = getHighResImage(post.image || 'https://files.catbox.moe/ru6efb.jpeg');
         if (imgSrc.startsWith('assets/images/')) {
@@ -285,7 +291,7 @@ async function build() {
         }
 
         const categoriesHtml = post.categories.map(cat => {
-            return `<span class="post-category-badge" style="position:static; display:inline-block; margin-left:5px;">${cat}</span>`;
+            return `<span class="post-category-badge" style="position:static; display:inline-block; margin-left:5px;">${getCategoryDisplayName(cat)}</span>`;
         }).join('');
 
         // Helper to insert middle ad
