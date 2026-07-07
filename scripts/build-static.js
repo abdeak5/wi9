@@ -251,6 +251,27 @@ async function build() {
     fs.writeFileSync(indexPath, indexHtml, 'utf8');
     console.log('Saved index.html updates.');
 
+    // 3.5. Update the baked-in posts array in 404.html for automatic redirects of old Blogger URLs
+    const path404 = path.join(__dirname, '..', '404.html');
+    if (fs.existsSync(path404)) {
+        let html404 = fs.readFileSync(path404, 'utf8');
+        const preloadRegex404 = /let _preloadedPosts\s*=\s*null;/;
+        const preloadReplacement404 = `let _preloadedPosts = ${JSON.stringify(allPosts)};`;
+        if (preloadRegex404.test(html404)) {
+            html404 = html404.replace(preloadRegex404, preloadReplacement404);
+            fs.writeFileSync(path404, html404, 'utf8');
+            console.log('Successfully baked all articles list into 404.html for Blogger redirection.');
+        } else {
+            // Fallback for re-builds
+            const bakedRegex404 = /let _preloadedPosts\s*=\s*\[[\s\S]*?\];/;
+            if (bakedRegex404.test(html404)) {
+                html404 = html404.replace(bakedRegex404, preloadReplacement404);
+                fs.writeFileSync(path404, html404, 'utf8');
+                console.log('Successfully updated the baked articles list in 404.html.');
+            }
+        }
+    }
+
     // 4. Generate the static HTML file for each article
     console.log('Generating static HTML pages for all articles...');
     allPosts.forEach(post => {
